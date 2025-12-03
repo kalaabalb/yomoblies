@@ -1,0 +1,52 @@
+name: e_commerce_flutter
+description: A complete Flutter e-commerce application
+publish_to: 'none'
+version: 1.0.0+2
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  get: ^4.6.6
+  provider: ^6.1.2
+  bottom_navy_bar: ^6.0.0
+  smooth_page_indicator: ^1.1.0
+  flutter_rating_bar: ^4.0.1
+  font_awesome_flutter: ^10.7.0
+  animations: ^2.0.11
+  dropdown_button2: ^2.3.9
+  flutter_svg: ^2.0.9
+  get_storage: ^2.1.1
+  flutter_cart: ^0.0.9
+  webview_flutter: ^4.7.0
+  url_launcher: ^6.2.2
+  image_picker: ^1.0.4
+  flutter_stripe: ^10.1.1
+  cached_network_image: ^3.4.1
+  # razorpay_flutter: ^1.4.0  # Commented out for now
+  onesignal_flutter: ^5.1.6
+  flutter_launcher_icons: ^0.13.1  # ADD THIS LINE
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path: "assets/images/logo.png"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/images/logo.png"
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/images/onboarding1.svg
+    - assets/images/onboarding2.svg
+    - assets/images/onboarding3.svg
+    - assets/images/onboarding4.svg
+    - assets/images/logo.png
+    - assets/images/profile_pic.png
