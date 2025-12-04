@@ -245,9 +245,6 @@ class CartProvider extends ChangeNotifier {
 
             // Force UI update
             notifyListeners();
-
-            SnackBarHelper.showSuccessSnackBar(
-                'Payment proof uploaded successfully!');
             return true;
           }
         }
@@ -497,8 +494,8 @@ class CartProvider extends ChangeNotifier {
                       icon: Icons.account_balance,
                       title: 'Bank Transfer',
                       instructions: [
-                        'Account Name: Your Store Name',
-                        'Account Number: 1000 1234 5678',
+                        'Account Name:YONAS AMBELU',
+                        'Account Number: 1000402270202',
                         'Bank: Commercial Bank of Ethiopia',
                         'Reference: ORDER-${DateTime.now().millisecondsSinceEpoch}',
                         'Amount: Birr ${getGrandTotal().toStringAsFixed(2)}',
@@ -582,7 +579,7 @@ class CartProvider extends ChangeNotifier {
                       instructions: [
                         '1. Open Telebirr App',
                         '2. Go to "Send Money" or "Payments"',
-                        '3. Enter merchant number: 251-XXX-XXXX',
+                        '3. Enter merchant number: +251922737271',
                         '4. Amount: Birr ${getGrandTotal().toStringAsFixed(2)}',
                         '5. Use reference: ORDER-${DateTime.now().millisecondsSinceEpoch}',
                       ],

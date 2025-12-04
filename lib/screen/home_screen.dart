@@ -16,6 +16,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  bool _isInitialLoad = true;
 
   final List<Widget> _screens = [
     const ProductListScreen(),
@@ -23,6 +24,28 @@ class _HomeScreenState extends State<HomeScreen> {
     const CartScreen(),
     const ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Load initial data when HomeScreen is created
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    // This ensures data loads when the app starts
+    if (_isInitialLoad) {
+      _isInitialLoad = false;
+      // Give a small delay to ensure context is available
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // Load data in the background
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final dataProvider = context.read<DataProvider>();
+        await dataProvider.refreshAllData();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

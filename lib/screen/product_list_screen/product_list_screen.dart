@@ -20,8 +20,42 @@ import '../product_favorite_screen/favorite_screen.dart';
 import '../product_cart_screen/cart_screen.dart';
 import '../../shared/widgets/loading_states.dart';
 
-class ProductListScreen extends StatelessWidget {
+// Change ProductListScreen to StatefulWidget
+class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
+
+  @override
+  State<ProductListScreen> createState() => _ProductListScreenState();
+}
+
+class _ProductListScreenState extends State<ProductListScreen> {
+  bool _isInitialLoad = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load data when this screen is created
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    if (_isInitialLoad) {
+      _isInitialLoad = false;
+      // Small delay to ensure context is available
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final dataProvider = context.read<DataProvider>();
+        final productListProvider = context.read<ProductListProvider>();
+
+        // Load all data
+        await dataProvider.refreshAllData();
+
+        // Update product list with loaded data
+        productListProvider.updateProducts(dataProvider.allProducts);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +74,7 @@ class ProductListScreen extends StatelessWidget {
           child: Consumer<DataProvider>(
             builder: (context, dataProvider, child) {
               // Show loading skeleton while data is loading
-              if (dataProvider.isLoading) {
+              if (dataProvider.isLoading && dataProvider.allProducts.isEmpty) {
                 return _buildLoadingSkeleton();
               }
 
@@ -73,7 +107,8 @@ class ProductListScreen extends StatelessWidget {
                       const SizedBox(height: 20),
 
                       // Posters section with loading state
-                      dataProvider.isPostersLoading
+                      dataProvider.isPostersLoading &&
+                              dataProvider.posters.isEmpty
                           ? _buildPostersLoadingSkeleton()
                           : const PosterSection(),
 
@@ -90,7 +125,8 @@ class ProductListScreen extends StatelessWidget {
                       const SizedBox(height: 10),
 
                       // Categories with loading state
-                      dataProvider.isCategoriesLoading
+                      dataProvider.isCategoriesLoading &&
+                              dataProvider.categories.isEmpty
                           ? _buildCategoriesLoadingSkeleton()
                           : Consumer<DataProvider>(
                               builder: (context, dataProvider, child) {
@@ -108,16 +144,17 @@ class ProductListScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
 
-// Products with loading state
-                      dataProvider.isProductsLoading
+                      // Products with loading state
+                      dataProvider.isProductsLoading &&
+                              dataProvider.allProducts.isEmpty
                           ? _buildProductsLoadingSkeleton()
                           : Consumer2<DataProvider, ProductListProvider>(
                               builder: (context, dataProvider,
                                   productListProvider, child) {
-                                // Use a flag to prevent infinite updates
-                                if (productListProvider.searchQuery.isEmpty &&
-                                    productListProvider
-                                        .filteredProducts.isEmpty) {
+                                // Always ensure product list is updated with current data
+                                if (productListProvider
+                                        .filteredProducts.isEmpty &&
+                                    dataProvider.allProducts.isNotEmpty) {
                                   WidgetsBinding.instance
                                       .addPostFrameCallback((_) {
                                     productListProvider.updateProducts(
@@ -145,6 +182,8 @@ class ProductListScreen extends StatelessWidget {
       ),
     );
   }
+
+  // ... rest of the file remains the same (loading skeletons, drawer, etc.)
 
   // YouTube-like loading skeleton for main content
   Widget _buildLoadingSkeleton() {

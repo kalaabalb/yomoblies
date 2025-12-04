@@ -1,5 +1,5 @@
+import 'package:e_commerce_flutter/screen/home_screen.dart';
 import 'package:e_commerce_flutter/utility/text_direction_fix.dart';
-
 import 'screen/product_details_screen/provider/rating_provider.dart';
 import 'screen/login_screen/provider/user_provider.dart';
 import 'screen/product_by_category_screen/provider/product_by_category_provider.dart';
@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
           dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch},
         ),
         debugShowCheckedModeBanner: false,
-        home: const SplashScreen(),
+        home: const HomeScreen(),
         theme: AppTheme.lightAppTheme,
         darkTheme: AppTheme.darkAppTheme,
         themeMode: context.watch<DataProvider>().isDarkMode

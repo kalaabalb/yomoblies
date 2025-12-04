@@ -35,7 +35,58 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-// Login with username or email
+  Future<void> registerUser(String name, String email, String password) async {
+    try {
+      Map<String, dynamic> user = {
+        "name": name.toLowerCase(),
+        "email": email.toLowerCase(),
+        "password": password,
+      };
+
+      final response = await service.addItem(
+        endpointUrl: 'users/register',
+        itemData: user,
+      );
+
+      if (response.isOk) {
+        ApiResponse apiResponse = ApiResponse.fromJson(response.body, null);
+        if (apiResponse.success == true) {
+          SnackBarHelper.showSuccessSnackBar(apiResponse.message);
+
+          // If email was provided, navigate to verification screen
+          if (email.isNotEmpty) {
+            Get.offAll(() => EmailVerificationScreen(
+                  email: email,
+                  onVerificationComplete: () async {
+                    print(
+                        '🟡 [REGISTER] onVerificationComplete callback executed');
+                    // Try to login after verification
+                    await loginUser(name, password);
+                  },
+                ));
+          } else {
+            // If no email, login directly
+            await loginUser(name, password);
+          }
+        } else {
+          // Handle specific error messages
+          if (apiResponse.message.contains('already exists') == true) {
+            throw Exception(
+                'This email is already registered. Please use a different email or try logging in.');
+          } else {
+            throw Exception(apiResponse.message ?? 'Registration failed');
+          }
+        }
+      } else {
+        throw Exception('Registration failed: ${response.statusText}');
+      }
+    } catch (e) {
+      SnackBarHelper.showErrorSnackBar('Registration failed: $e');
+      rethrow;
+    }
+  }
+
+// Update the loginUser method to trigger data loading after successful login
   Future<void> loginUser(String identifier, String password) async {
     try {
       // Clear any previous user data first
@@ -72,7 +123,13 @@ class UserProvider extends ChangeNotifier {
           await saveLoginInfo(user); // persist BEFORE navigating
           SnackBarHelper.showSuccessSnackBar(apiResponse.message);
 
+          // Navigate to home and trigger data loading
           Get.offAll(const HomeScreen());
+
+          // Trigger data loading after navigation
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            // This will trigger data loading in HomeScreen
+          });
         } else {
           throw Exception(apiResponse.message);
         }
@@ -81,59 +138,6 @@ class UserProvider extends ChangeNotifier {
       }
     } catch (e) {
       SnackBarHelper.showErrorSnackBar('Login failed: $e');
-      rethrow;
-    }
-  }
-
-// Register with email verification
-  Future<void> registerUser(String name, String email, String password) async {
-    try {
-      Map<String, dynamic> user = {
-        "name": name.toLowerCase(),
-        "email": email.toLowerCase(),
-        "password": password,
-      };
-
-      final response = await service.addItem(
-        endpointUrl: 'users/register',
-        itemData: user,
-      );
-
-      if (response.isOk) {
-        ApiResponse apiResponse = ApiResponse.fromJson(response.body, null);
-        if (apiResponse.success == true) {
-          SnackBarHelper.showSuccessSnackBar(apiResponse.message);
-
-          // If email was provided, navigate to verification screen
-          if (email.isNotEmpty) {
-            Get.offAll(() => EmailVerificationScreen(
-                  email: email,
-                  onVerificationComplete: () async {
-                    print(
-                        '🟡 [REGISTER] onVerificationComplete callback executed');
-                    // Try to login after verification
-                    await loginUser(name, password);
-                  },
-                ));
-          } else {
-            // If no email, login directly
-
-            await loginUser(name, password);
-          }
-        } else {
-          // Handle specific error messages
-          if (apiResponse.message.contains('already exists') == true) {
-            throw Exception(
-                'This email is already registered. Please use a different email or try logging in.');
-          } else {
-            throw Exception(apiResponse.message ?? 'Registration failed');
-          }
-        }
-      } else {
-        throw Exception('Registration failed: ${response.statusText}');
-      }
-    } catch (e) {
-      SnackBarHelper.showErrorSnackBar('Registration failed: $e');
       rethrow;
     }
   }
