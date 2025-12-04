@@ -3,7 +3,7 @@ name: Build and Release APK
 on:
   push:
     tags:
-      - 'v*'  # Run when you create version tags
+      - 'v*'
 
 jobs:
   build:
@@ -13,62 +13,38 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
     
-    - name: Setup Java
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-    
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.19.0'
-        channel: 'stable'
     
     - name: Install dependencies
+      run: flutter pub get
+    
+    - name: Debug info
       run: |
-        flutter pub get
-        # Generate app icons if configured
-        if [ -f "pubspec.yaml" ] && grep -q "flutter_launcher_icons" pubspec.yaml; then
-          flutter pub run flutter_launcher_icons:main
-        fi
+        echo "=== Debug Info ==="
+        echo "PWD: $(pwd)"
+        echo "LS: $(ls -la)"
+        echo "Flutter version: $(flutter --version)"
+        echo "=== End Debug ==="
     
     - name: Build APK
       run: flutter build apk --release
     
+    - name: List build files
+      run: find build -type f -name "*.apk" | head -10
+    
     - name: Create Release
-      id: create_release
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
         files: |
           build/app/outputs/flutter-apk/app-release.apk
         body: |
-          ## 📱 YoMoblies Shopping App
-          
-          ### What's New
-          - UI improvements and text updates
-          - Fixed layout issues
-          - Enhanced user experience
-          
-          ### Installation Instructions
-          1. **Download** the APK below
-          2. **Enable** "Install from unknown sources" in Android settings
-          3. **Install** the APK
-          4. **Launch** and start shopping!
-          
-          ### Version: ${{ github.ref }}
-          **Built on:** $(date)
-          
-          ### Backend Services
-          - **API:** Render backend
-          - **Database:** MongoDB Atlas
-          - **Images:** Cloudinary
-          
-          ### Support
-          Report issues on GitHub or contact the developer.
+          YoMoblies Shopping App
+          Version: ${{ github.ref }}
+          Built: $(date)
