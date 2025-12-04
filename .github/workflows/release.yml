@@ -1,0 +1,72 @@
+name: Build and Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'  # Run when you create version tags like v1.0.0, v1.0.1, etc.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.19.0'
+        channel: 'stable'
+    
+    - name: Install dependencies
+      run: |
+        flutter pub get
+        flutter pub run flutter_launcher_icons:main
+    
+    - name: Build APK
+      run: flutter build apk --release
+    
+    - name: Upload APK as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-release-apk
+        path: build/app/outputs/flutter-apk/app-release.apk
+    
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+        files: |
+          build/app/outputs/flutter-apk/app-release.apk
+        body: |
+          ## What's New
+          - UI improvements and text updates
+          - Fixed layout issues
+          - Enhanced user experience
+          
+          ## Installation
+          1. Download the APK below
+          2. Enable "Install from unknown sources" in Android settings
+          3. Install the APK
+          4. Launch and enjoy!
+          
+          ## Version: ${{ github.ref }}
+          Built on: $(date)
+          
+          ## Backend
+          - API: Your Render backend
+          - Database: MongoDB Atlas
+          - Images: Cloudinary
