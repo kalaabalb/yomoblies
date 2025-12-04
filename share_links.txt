@@ -1,0 +1,26 @@
+🎉 **YoMoblies Shopping App is Ready!** 🛍️
+
+📱 **Download:** https://github.com/kalaabalb/yomoblies/releases/latest/download/app-release.apk
+
+🌐 **Download Page:** https://kalaabalb.github.io/yomoblies/
+
+📋 **Features:**
+- Browse thousands of products
+- Add to cart & secure checkout
+- Fast delivery tracking
+- User reviews & ratings
+
+⚙️ **Tech Stack:**
+- Flutter (Mobile App)
+- Node.js + Render (Backend API)
+- MongoDB Atlas (Database)
+- Cloudinary (Image Storage)
+
+📲 **Installation:**
+1. Download the APK
+2. Enable "Unknown Sources" in settings
+3. Install and enjoy!
+
+🐛 **Report Issues:** https://github.com/kalaabalb/yomoblies/issues
+
+Version: v1.0.5
