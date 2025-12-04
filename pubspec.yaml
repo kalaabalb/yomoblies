@@ -1,7 +1,7 @@
 name: e_commerce_flutter
 description: A complete Flutter e-commerce application
 publish_to: 'none'
-version: 1.0.0+4
+version: 1.0.5+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

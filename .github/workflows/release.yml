@@ -3,7 +3,7 @@ name: Build and Release APK
 on:
   push:
     tags:
-      - 'v*'  # Run when you create version tags like v1.0.0, v1.0.1, etc.
+      - 'v*'  # Run when you create version tags
 
 jobs:
   build:
@@ -28,16 +28,13 @@ jobs:
     - name: Install dependencies
       run: |
         flutter pub get
-        flutter pub run flutter_launcher_icons:main
+        # Generate app icons if configured
+        if [ -f "pubspec.yaml" ] && grep -q "flutter_launcher_icons" pubspec.yaml; then
+          flutter pub run flutter_launcher_icons:main
+        fi
     
     - name: Build APK
       run: flutter build apk --release
-    
-    - name: Upload APK as artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: app-release-apk
-        path: build/app/outputs/flutter-apk/app-release.apk
     
     - name: Create Release
       id: create_release
@@ -52,21 +49,26 @@ jobs:
         files: |
           build/app/outputs/flutter-apk/app-release.apk
         body: |
-          ## What's New
+          ## 📱 YoMoblies Shopping App
+          
+          ### What's New
           - UI improvements and text updates
           - Fixed layout issues
           - Enhanced user experience
           
-          ## Installation
-          1. Download the APK below
-          2. Enable "Install from unknown sources" in Android settings
-          3. Install the APK
-          4. Launch and enjoy!
+          ### Installation Instructions
+          1. **Download** the APK below
+          2. **Enable** "Install from unknown sources" in Android settings
+          3. **Install** the APK
+          4. **Launch** and start shopping!
           
-          ## Version: ${{ github.ref }}
-          Built on: $(date)
+          ### Version: ${{ github.ref }}
+          **Built on:** $(date)
           
-          ## Backend
-          - API: Your Render backend
-          - Database: MongoDB Atlas
-          - Images: Cloudinary
+          ### Backend Services
+          - **API:** Render backend
+          - **Database:** MongoDB Atlas
+          - **Images:** Cloudinary
+          
+          ### Support
+          Report issues on GitHub or contact the developer.
