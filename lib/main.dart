@@ -17,7 +17,6 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'dart:ui' show PointerDeviceKind;
 import 'package:provider/provider.dart';
 import 'core/data/data_provider.dart';
-import 'screen/splash_screen/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
