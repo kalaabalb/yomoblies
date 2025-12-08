@@ -1,14 +1,16 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:e_commerce_flutter/screen/home_screen.dart';
 import 'package:e_commerce_flutter/screen/profile_screen/provider/profile_provider.dart';
 import 'package:e_commerce_flutter/utility/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cart/cart.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import '../../../models/api_response.dart';
 import '../../../models/user.dart';
 import '../../../services/http_services.dart';
 import '../login_screen.dart';
-import 'package:get_storage/get_storage.dart';
 import '../../../utility/constants.dart';
 
 class UserProvider extends ChangeNotifier {
@@ -37,7 +39,7 @@ class UserProvider extends ChangeNotifier {
       clearAllUserData();
 
       Map<String, dynamic> loginData = {
-        'name': username.toLowerCase(),
+        'name': username.toLowerCase().trim(),
         'password': password,
       };
 
@@ -47,28 +49,33 @@ class UserProvider extends ChangeNotifier {
       );
 
       if (response.isOk) {
-        final ApiResponse<User> apiResponse = ApiResponse.fromJson(
-          response.body,
-          (json) => User.fromJson(json as Map<String, dynamic>),
-        );
+        final responseBody = response.body as Map<String, dynamic>;
+        final success = responseBody['success'] ?? false;
+        final message = responseBody['message'] ?? 'Login successful';
+        final data = responseBody['data'];
 
-        if (apiResponse.success == true) {
-          User? user = apiResponse.data;
+        if (success && data != null) {
+          User user = User.fromJson(data as Map<String, dynamic>);
 
           clearAllUserData();
-
           await saveLoginInfo(user);
-          SnackBarHelper.showSuccessSnackBar(apiResponse.message);
 
+          SnackBarHelper.showSuccessSnackBar('Welcome back, ${user.name}!');
           Get.offAll(const HomeScreen());
         } else {
-          throw Exception(apiResponse.message);
+          throw Exception(message);
         }
       } else {
-        throw Exception('Login failed: ${response.statusText}');
+        if (response.statusCode == 401) {
+          throw Exception('Invalid name or password.');
+        } else if (response.statusCode == 404) {
+          throw Exception('User not found.');
+        } else {
+          throw Exception('Login failed: ${response.statusText}');
+        }
       }
     } catch (e) {
-      SnackBarHelper.showErrorSnackBar('Login failed: $e');
+      SnackBarHelper.showErrorSnackBar(e.toString());
       rethrow;
     }
   }
@@ -77,7 +84,7 @@ class UserProvider extends ChangeNotifier {
       String name, String dummyEmail, String password) async {
     try {
       Map<String, dynamic> user = {
-        "name": name.toLowerCase(),
+        "name": name.toLowerCase().trim(),
         "email": dummyEmail.toLowerCase(),
         "password": password,
       };
@@ -88,24 +95,26 @@ class UserProvider extends ChangeNotifier {
       );
 
       if (response.isOk) {
-        ApiResponse apiResponse = ApiResponse.fromJson(response.body, null);
-        if (apiResponse.success == true) {
-          SnackBarHelper.showSuccessSnackBar(apiResponse.message);
+        final responseBody = response.body as Map<String, dynamic>;
+        final success = responseBody['success'] ?? false;
+        final message = responseBody['message'] ?? 'Registration successful';
+
+        if (success) {
+          SnackBarHelper.showSuccessSnackBar('Account created successfully!');
 
           await loginUser(name, password);
         } else {
-          if (apiResponse.message.contains('already exists') == true) {
-            throw Exception(
-                'This username is already taken. Please choose a different username.');
-          } else {
-            throw Exception(apiResponse.message ?? 'Registration failed');
-          }
+          throw Exception(message);
         }
       } else {
-        throw Exception('Registration failed: ${response.statusText}');
+        if (response.statusCode == 400) {
+          throw Exception('Registration failed. Please check your details.');
+        } else {
+          throw Exception('Registration failed: ${response.statusText}');
+        }
       }
     } catch (e) {
-      SnackBarHelper.showErrorSnackBar('Registration failed: $e');
+      SnackBarHelper.showErrorSnackBar(e.toString());
       rethrow;
     }
   }
@@ -116,53 +125,100 @@ class UserProvider extends ChangeNotifier {
     required String currentPassword,
     String? newPassword,
   }) async {
+    bool isLoadingDialogShown = false;
+
     try {
+      if (name.isEmpty) {
+        SnackBarHelper.showProfileError('Username cannot be empty');
+        return;
+      }
+
+      if (currentPassword.isEmpty) {
+        SnackBarHelper.showProfileError('Current password is required');
+        return;
+      }
+
+      if (Get.isDialogOpen == false) {
+        Get.dialog(
+          const Center(
+            child: CircularProgressIndicator(),
+          ),
+          barrierDismissible: false,
+        );
+        isLoadingDialogShown = true;
+      }
+
       Map<String, dynamic> updateData = {
-        'name': name,
+        'name': name.trim(),
         'currentPassword': currentPassword,
       };
 
       if (newPassword != null && newPassword.isNotEmpty) {
-        updateData['newPassword'] = newPassword;
+        if (newPassword.length < 4) {
+          _closeLoadingDialog(isLoadingDialogShown);
+          SnackBarHelper.showProfileError(
+              'New password must be at least 4 characters');
+          return;
+        }
+        updateData['password'] = newPassword;
       }
 
       final response = await service.updateItem(
-        endpointUrl: 'users/update-profile',
+        endpointUrl: 'users',
         itemId: userId,
         itemData: updateData,
       );
 
-      if (response.isOk) {
-        final ApiResponse apiResponse =
-            ApiResponse.fromJson(response.body, null);
-        if (apiResponse.success == true) {
-          SnackBarHelper.showSuccessSnackBar(apiResponse.message);
+      _closeLoadingDialog(isLoadingDialogShown);
 
-          if (apiResponse.data != null) {
-            final updatedUser = User.fromJson(apiResponse.data);
+      if (response.isOk) {
+        final responseBody = response.body as Map<String, dynamic>;
+        final success = responseBody['success'] ?? false;
+        final message = responseBody['message'] ?? 'Profile updated';
+
+        if (success) {
+          final data = responseBody['data'];
+
+          if (data != null && data is Map<String, dynamic>) {
+            final updatedUser = User.fromJson(data);
             await saveLoginInfo(updatedUser);
 
-            Get.snackbar(
-              'Success',
-              'Profile updated successfully. Please login again with your new credentials.',
-              duration: const Duration(seconds: 5),
-            );
+            notifyListeners();
 
-            Future.delayed(const Duration(seconds: 2), () {
-              logOutUser();
-            });
+            SnackBarHelper.showSuccessSnackBar('Profile updated successfully!');
+
+            if (newPassword != null && newPassword.isNotEmpty) {
+              Get.snackbar(
+                'Password Changed',
+                'Password updated successfully. Please login again.',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.green,
+                colorText: Colors.white,
+                duration: const Duration(seconds: 3),
+              );
+
+              Future.delayed(const Duration(seconds: 2), () {
+                logOutUser();
+              });
+            }
           }
-
-          notifyListeners();
         } else {
-          throw Exception(apiResponse.message);
+          SnackBarHelper.showProfileError(message);
         }
       } else {
-        throw Exception('Profile update failed: ${response.statusText}');
+        SnackBarHelper.showProfileError(
+            'Update failed: ${response.statusText}');
       }
     } catch (e) {
-      SnackBarHelper.showErrorSnackBar('Profile update failed: $e');
-      rethrow;
+      _closeLoadingDialog(isLoadingDialogShown);
+      print('❌ Profile update error: $e');
+      SnackBarHelper.showProfileError('An error occurred');
+    }
+  }
+
+  void _closeLoadingDialog(bool wasShown) {
+    if (wasShown && Get.isDialogOpen == true) {
+      Get.back();
     }
   }
 
@@ -171,40 +227,49 @@ class UserProvider extends ChangeNotifier {
     try {
       await box.write(USER_INFO_BOX, loginUser.toJson());
       notifyListeners();
-    } catch (e) {}
+    } catch (e) {
+      print('Error saving login info: $e');
+    }
   }
 
   void clearAllUserData() {
-    box.remove(USER_INFO_BOX);
+    try {
+      box.remove(USER_INFO_BOX);
 
-    box.remove(FAVORITE_PRODUCT_BOX);
+      box.remove(FAVORITE_PRODUCT_BOX);
 
-    var flutterCart = FlutterCart();
-    flutterCart.clearCart();
+      var flutterCart = FlutterCart();
+      flutterCart.clearCart();
 
-    box.remove(PHONE_KEY);
-    box.remove(STREET_KEY);
-    box.remove(CITY_KEY);
-    box.remove(STATE_KEY);
-    box.remove(POSTAL_CODE_KEY);
-    box.remove(COUNTRY_KEY);
+      box.remove(PHONE_KEY);
+      box.remove(STREET_KEY);
+      box.remove(CITY_KEY);
+      box.remove(STATE_KEY);
+      box.remove(POSTAL_CODE_KEY);
+      box.remove(COUNTRY_KEY);
 
-    box.remove('profileImagePath');
-    box.remove('profile_image_path');
+      box.remove('profileImagePath');
 
-    try {} catch (e) {}
-
-    notifyListeners();
+      notifyListeners();
+    } catch (e) {
+      print('Error clearing user data: $e');
+    }
   }
 
   void logOutUser() {
     try {
-      final profileProvider = Get.find<ProfileProvider>();
-      profileProvider.clearProfileData();
-    } catch (e) {}
+      try {
+        final profileProvider = Get.find<ProfileProvider>();
+        profileProvider.clearProfileData();
+      } catch (e) {}
 
-    clearAllUserData();
-    Get.offAll(const LoginScreen());
-    notifyListeners();
+      clearAllUserData();
+      Get.offAll(const LoginScreen());
+      SnackBarHelper.showInfoSnackBar('Logged out successfully');
+      notifyListeners();
+    } catch (e) {
+      print('Error during logout: $e');
+      Get.offAll(const LoginScreen());
+    }
   }
 }

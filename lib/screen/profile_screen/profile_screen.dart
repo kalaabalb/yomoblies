@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:e_commerce_flutter/core/data/data_provider.dart';
 import 'package:e_commerce_flutter/screen/home_screen.dart';
 import 'package:e_commerce_flutter/screen/product_favorite_screen/favorite_screen.dart';
+import 'package:e_commerce_flutter/utility/snack_bar_helper.dart';
 import '../login_screen/login_screen.dart';
 import '../my_address_screen/my_address_screen.dart';
 import '../../utility/animation/open_container_wrapper.dart';
@@ -63,26 +64,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _saveProfile() async {
     if (_nameController.text.isEmpty) {
-      Get.snackbar('Error', 'Username is required');
+      SnackBarHelper.showErrorSnackBar('Username is required');
       return;
     }
 
     if (_currentPasswordController.text.isEmpty) {
-      Get.snackbar('Error', 'Current password is required for verification');
+      SnackBarHelper.showErrorSnackBar(
+          'Current password is required for verification');
       return;
     }
 
     if (_isChangingPassword) {
       if (_newPasswordController.text.isEmpty) {
-        Get.snackbar('Error', 'New password is required');
+        SnackBarHelper.showErrorSnackBar('New password is required');
         return;
       }
       if (_newPasswordController.text != _confirmPasswordController.text) {
-        Get.snackbar('Error', 'Passwords do not match');
+        SnackBarHelper.showErrorSnackBar('Passwords do not match');
         return;
       }
       if (_newPasswordController.text.length < 6) {
-        Get.snackbar('Error', 'Password must be at least 6 characters');
+        SnackBarHelper.showErrorSnackBar(
+            'Password must be at least 6 characters');
         return;
       }
     }
@@ -94,7 +97,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final user = context.userProvider.getLoginUsr();
       if (user == null) {
-        Get.snackbar('Error', 'User not found');
+        SnackBarHelper.showErrorSnackBar('User not found');
+        setState(() {
+          _isLoading = false;
+        });
         return;
       }
 
@@ -104,8 +110,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         currentPassword: _currentPasswordController.text,
         newPassword: _isChangingPassword ? _newPasswordController.text : null,
       );
+
+      setState(() {
+        _isEditing = false;
+        _isLoading = false;
+        _isChangingPassword = false;
+
+        _currentPasswordController.clear();
+        _newPasswordController.clear();
+        _confirmPasswordController.clear();
+      });
+
+      SnackBarHelper.showSuccessSnackBar('Profile updated successfully!');
+
+      _loadUserData();
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update profile: $e');
       setState(() {
         _isLoading = false;
       });
@@ -139,10 +158,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         actions: [
           if (_isEditing) ...[
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _isLoading ? null : _saveProfile,
-            ),
+            if (_isLoading)
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
+            else
+              IconButton(
+                icon: const Icon(Icons.save),
+                onPressed: _saveProfile,
+              ),
             IconButton(
               icon: const Icon(Icons.close),
               onPressed: _isLoading
@@ -218,7 +247,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       value!.isEmpty ? 'Username is required' : null,
                 ),
                 const SizedBox(height: 20),
-                // Password Change Section
                 Row(
                   children: [
                     Text(
@@ -245,8 +273,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ],
                 ),
-
-// Current password is ALWAYS required for verification
                 const SizedBox(height: 20),
                 CustomTextField(
                   controller: _currentPasswordController,
@@ -255,8 +281,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   validator: (value) =>
                       value!.isEmpty ? 'Current password is required' : null,
                 ),
-
-// Only show new password fields if changing password
                 if (_isChangingPassword) ...[
                   const SizedBox(height: 20),
                   CustomTextField(

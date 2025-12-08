@@ -5,7 +5,8 @@ class AppColor {
   static const Color primaryLight = Color(0xFFFFF3E0); // Very light orange
   static const Color primary = Color(0xFFFFCC80); // Light orange
   static const Color primaryDark = Color(0xFFFFB74D); // Gentle orange
-  static const Color darkOrange = Color(0xFFF57C00); // Subtle dark orange
+  static const Color darkOrange =
+      Color.fromARGB(255, 141, 97, 52); // Subtle dark orange
 
   // Secondary Colors - Gentle blues
   static const Color secondaryLight = Color(0xFFE3F2FD);
