@@ -1,5 +1,5 @@
-import '../../product_by_category_screen/product_by_category_screen.dart';
-import '../../../utility/animation/open_container_wrapper.dart';
+import 'package:e_commerce_flutter/screen/product_by_category_screen/product_by_category_screen.dart';
+import 'package:e_commerce_flutter/utility/animation/open_container_wrapper.dart';
 import 'package:flutter/material.dart';
 import '../../../models/category.dart';
 

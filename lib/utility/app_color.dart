@@ -1,35 +1,128 @@
-import 'package:flutter/material.dart' show Color;
+import 'package:flutter/material.dart';
 
 class AppColor {
-  const AppColor._();
+  // Primary Colors - Gentle orange palette
+  static const Color primaryLight = Color(0xFFFFF3E0); // Very light orange
+  static const Color primary = Color(0xFFFFCC80); // Light orange
+  static const Color primaryDark = Color(0xFFFFB74D); // Gentle orange
+  static const Color darkOrange = Color(0xFFF57C00); // Subtle dark orange
 
-  // New elegant color scheme
-  static const primaryBlue = Color(0xFF2D5A7E);
-  static const secondaryBlue = Color(0xFF4A7BA6);
-  static const accentTeal = Color(0xFF2A9D8F);
-  static const lightTeal = Color(0xFF8ECAE6);
+  // Secondary Colors - Gentle blues
+  static const Color secondaryLight = Color(0xFFE3F2FD);
+  static const Color secondary = Color(0xFF90CAF9);
+  static const Color secondaryDark = Color(0xFF42A5F5);
 
-  static const darkGrey = Color(0xFF2B2D42);
-  static const mediumGrey = Color(0xFF8D99AE);
-  static const lightGrey = Color(0xFFEDF2F4);
+  // Accent Colors - Gentle purples
+  static const Color accentLight = Color(0xFFF3E5F5);
+  static const Color accent = Color(0xFFCE93D8);
+  static const Color accentDark = Color(0xFFAB47BC);
 
-  static const successGreen = Color(0xFF4CAF50);
-  static const warningAmber = Color(0xFFFFB74D);
-  static const errorRed = Color(0xFFEF5350);
+  // Neutral Colors - Soft grays
+  static const Color background = Color(0xFFFAFAFA);
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color card = Color(0xFFFFFFFF);
 
-  // Gradient colors
-  static const gradientStart = Color(0xFF2D5A7E);
-  static const gradientEnd = Color(0xFF4A7BA6);
+  // Gray colors - Add missing lightGrey
+  static const Color lightGrey = Color(0xFFF5F5F5); // Added light grey
+  static const Color mediumGrey = Color(0xFFE0E0E0);
+  static const Color darkGrey = Color(0xFF757575);
 
-  // Background colors
-  static const scaffoldLight = Color(0xFFF8F9FA);
-  static const scaffoldDark = Color(0xFF121212);
+  static const Color textPrimary = Color(0xFF212121);
+  static const Color textSecondary = Color(0xFF757575);
+  static const Color textDisabled = Color(0xFFBDBDBD);
 
-  // Card colors
-  static const cardLight = Color(0xFFFFFFFF);
-  static const cardDark = Color(0xFF1E1E1E);
+  static const Color divider = Color(0xFFE0E0E0);
+  static const Color border = Color(0xFFEEEEEE);
 
-  // Keep the old names for backward compatibility
-  static const darkOrange = Color(0xFF2D5A7E); // Same as primaryBlue
-  static const lightOrange = Color(0xFF4A7BA6); // Same as secondaryBlue
+  // Status Colors - Gentle versions
+  static const Color successLight = Color(0xFFE8F5E9);
+  static const Color success = Color(0xFF66BB6A);
+  static const Color successDark = Color(0xFF388E3C);
+
+  static const Color warningLight = Color(0xFFFFF8E1);
+  static const Color warning = Color(0xFFFFCA28);
+  static const Color warningDark = Color(0xFFFFA000);
+
+  static const Color errorLight = Color(0xFFFFEBEE);
+  static const Color error = Color(0xFFEF5350);
+  static const Color errorDark = Color(0xFFD32F2F);
+
+  static const Color infoLight = Color(0xFFE1F5FE);
+  static const Color info = Color(0xFF29B6F6);
+  static const Color infoDark = Color(0xFF0288D1);
+
+  // Gradient Colors - Gentle gradients
+  static LinearGradient get primaryGradient => LinearGradient(
+        colors: [primaryLight, primary],
+        begin: Alignment.topRight,
+        end: Alignment.bottomLeft,
+      );
+
+  static LinearGradient get secondaryGradient => LinearGradient(
+        colors: [secondaryLight, secondary],
+        begin: Alignment.topRight,
+        end: Alignment.bottomLeft,
+      );
+
+  static LinearGradient get accentGradient => LinearGradient(
+        colors: [accentLight, accent],
+        begin: Alignment.topRight,
+        end: Alignment.bottomLeft,
+      );
+
+  static LinearGradient get successGradient => LinearGradient(
+        colors: [successLight, success],
+        begin: Alignment.topRight,
+        end: Alignment.bottomLeft,
+      );
+
+  // Card Colors - Very light backgrounds
+  static const List<Color> cardColors = [
+    Color(0xFFE3F2FD), // Light Blue
+    Color(0xFFF3E5F5), // Light Purple
+    Color(0xFFE8F5E9), // Light Green
+    Color(0xFFFFF3E0), // Light Orange
+    Color(0xFFFCE4EC), // Light Pink
+    Color(0xFFF1F8E9), // Very Light Green
+    Color(0xFFE0F7FA), // Light Cyan
+    Color(0xFFEDE7F6), // Light Indigo
+  ];
+
+  // Get random gentle color
+  static Color getRandomGentleColor() {
+    return cardColors[DateTime.now().millisecond % cardColors.length];
+  }
+
+  // Get gradient for index
+  static LinearGradient getGradientForIndex(int index) {
+    final gradients = [
+      primaryGradient,
+      secondaryGradient,
+      accentGradient,
+      successGradient,
+      LinearGradient(
+        colors: [const Color(0xFFFCE4EC), const Color(0xFFF48FB1)],
+        begin: Alignment.topRight,
+        end: Alignment.bottomLeft,
+      ),
+    ];
+    return gradients[index % gradients.length];
+  }
+
+  // Wave effect gradient
+  static LinearGradient getWaveGradient(Color baseColor) {
+    return LinearGradient(
+      begin: Alignment.topRight,
+      end: Alignment.bottomLeft,
+      colors: [
+        baseColor.withOpacity(0.9),
+        baseColor.withOpacity(0.7),
+        baseColor.withOpacity(0.5),
+        baseColor.withOpacity(0.3),
+        baseColor.withOpacity(0.5),
+        baseColor.withOpacity(0.7),
+      ],
+      stops: const [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+    );
+  }
 }

@@ -1,13 +1,13 @@
-import 'provider/cart_provider.dart';
-import '../../utility/extensions.dart';
+import 'package:e_commerce_flutter/core/data/data_provider.dart';
+import 'package:e_commerce_flutter/screen/product_cart_screen/components/buy_now_bottom_sheet.dart';
+import 'package:e_commerce_flutter/screen/product_cart_screen/components/cart_list_section.dart';
+import 'package:e_commerce_flutter/screen/product_cart_screen/components/empty_cart.dart';
+import 'package:e_commerce_flutter/screen/product_cart_screen/provider/cart_provider.dart';
+import 'package:e_commerce_flutter/shared/widgets/buttons.dart';
+import 'package:e_commerce_flutter/utility/animation/animated_switcher_wrapper.dart';
+import 'package:e_commerce_flutter/utility/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../utility/animation/animated_switcher_wrapper.dart';
-import '../../utility/app_color.dart';
-import 'components/buy_now_bottom_sheet.dart';
-import 'components/cart_list_section.dart';
-import 'components/empty_cart.dart';
-import '../../shared/widgets/buttons.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -31,7 +31,7 @@ class _CartScreenState extends State<CartScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          context.dataProvider.translate('my_cart'),
+          context.read<DataProvider>().translate('my_cart'),
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -61,7 +61,7 @@ class _CartScreenState extends State<CartScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        context.dataProvider.translate('total'),
+                        context.read<DataProvider>().translate('total'),
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w400,
@@ -88,7 +88,7 @@ class _CartScreenState extends State<CartScreen> {
                   padding:
                       const EdgeInsets.only(left: 30, right: 30, bottom: 20),
                   child: PrimaryButton(
-                    text: context.dataProvider.translate('buy_now'),
+                    text: context.read<DataProvider>().translate('buy_now'),
                     onPressed: cartProvider.myCartItems.isEmpty
                         ? null
                         : () {

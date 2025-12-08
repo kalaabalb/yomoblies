@@ -63,7 +63,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _saveProfile() async {
     if (_nameController.text.isEmpty) {
-      Get.snackbar('Error', 'Name is required');
+      Get.snackbar('Error', 'Username is required');
+      return;
+    }
+
+    if (_currentPasswordController.text.isEmpty) {
+      Get.snackbar('Error', 'Current password is required for verification');
       return;
     }
 
@@ -96,23 +101,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await context.userProvider.updateProfile(
         userId: user.sId!,
         name: _nameController.text,
-        email: _emailController.text.isEmpty ? null : _emailController.text,
         currentPassword: _currentPasswordController.text,
         newPassword: _isChangingPassword ? _newPasswordController.text : null,
       );
-
-      setState(() {
-        _isEditing = false;
-        _isChangingPassword = false;
-        _currentPasswordController.clear();
-        _newPasswordController.clear();
-        _confirmPasswordController.clear();
-      });
-
-      Get.snackbar('Success', 'Profile updated successfully');
     } catch (e) {
       Get.snackbar('Error', 'Failed to update profile: $e');
-    } finally {
       setState(() {
         _isLoading = false;
       });
@@ -158,7 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       setState(() {
                         _isEditing = false;
                         _isChangingPassword = false;
-                        _loadUserData(); // Reload original data
+                        _loadUserData();
                         _currentPasswordController.clear();
                         _newPasswordController.clear();
                         _confirmPasswordController.clear();
@@ -225,13 +218,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       value!.isEmpty ? 'Username is required' : null,
                 ),
                 const SizedBox(height: 20),
-                CustomTextField(
-                  controller: _emailController,
-                  labelText: 'Email (Optional)',
-                  inputType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 20),
-
                 // Password Change Section
                 Row(
                   children: [
@@ -248,46 +234,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onChanged: _isLoading
                           ? null
                           : (value) {
-                              _togglePasswordChange();
+                              setState(() {
+                                _isChangingPassword = value;
+                                if (!value) {
+                                  _newPasswordController.clear();
+                                  _confirmPasswordController.clear();
+                                }
+                              });
                             },
                     ),
                   ],
                 ),
 
+// Current password is ALWAYS required for verification
+                const SizedBox(height: 20),
+                CustomTextField(
+                  controller: _currentPasswordController,
+                  labelText: 'Current Password (Required for verification)',
+                  obscureText: true,
+                  validator: (value) =>
+                      value!.isEmpty ? 'Current password is required' : null,
+                ),
+
+// Only show new password fields if changing password
                 if (_isChangingPassword) ...[
                   const SizedBox(height: 20),
                   CustomTextField(
-                    controller: _currentPasswordController,
-                    labelText:
-                        context.dataProvider.translate('current_password') ??
-                            'Current Password',
-                    obscureText: true,
-                    validator: (value) =>
-                        value!.isEmpty ? 'Current password is required' : null,
-                  ),
-                  const SizedBox(height: 20),
-                  CustomTextField(
                     controller: _newPasswordController,
-                    labelText: context.dataProvider.translate('new_password') ??
-                        'New Password',
+                    labelText: 'New Password (Optional)',
                     obscureText: true,
-                    validator: (value) =>
-                        value!.isEmpty ? 'New password is required' : null,
                   ),
                   const SizedBox(height: 20),
                   CustomTextField(
                     controller: _confirmPasswordController,
-                    labelText: context.dataProvider
-                            .translate('confirm_new_password') ??
-                        'Confirm New Password',
+                    labelText: 'Confirm New Password',
                     obscureText: true,
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please confirm password' : null,
+                    validator: (value) {
+                      if (_newPasswordController.text.isNotEmpty &&
+                          value != _newPasswordController.text) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    context.dataProvider.translate('profile_change_note') ??
-                        'Note: Changing email will require verification. Changing username/password will log you out.',
+                    'Note: Changing username or password will require you to login again.',
                     style: TextStyle(
                       color: Colors.orange[700],
                       fontSize: 12,
@@ -304,27 +296,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     fontSize: 20,
                   ),
                 ),
-                const SizedBox(height: 5),
-                if (user?.email != null) ...[
-                  Text(
-                    user!.email!,
-                    style: TextStyle(
-                      color: user.emailVerified ? Colors.green : Colors.orange,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  if (!user.emailVerified)
-                    Text(
-                      context.dataProvider.translate('email_not_verified') ??
-                          'Email not verified',
-                      style: TextStyle(
-                        color: Colors.orange[700],
-                        fontSize: 12,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                ],
                 const SizedBox(height: 5),
                 Text(
                   '${context.dataProvider.translate('member_since')} ${_formatDate(user?.createdAt)}',
@@ -381,7 +352,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               fontWeight: FontWeight.bold,
               color: Theme.of(
                 context,
-                // ignore: deprecated_member_use
               ).textTheme.bodyMedium?.color?.withOpacity(0.6),
               letterSpacing: 1.2,
             ),
@@ -462,7 +432,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               fontWeight: FontWeight.bold,
               color: Theme.of(
                 context,
-                // ignore: deprecated_member_use
               ).textTheme.bodyMedium?.color?.withOpacity(0.6),
               letterSpacing: 1.2,
             ),
@@ -535,11 +504,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildLogoutButton() {
-    return PrimaryButton(
-      text: context.dataProvider.translate('logout'),
-      onPressed: () {
-        _showLogoutConfirmation();
-      },
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        key: const ValueKey('logout_button'),
+        onPressed: () {
+          _showLogoutConfirmation();
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColor.darkOrange,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          context.dataProvider.translate('logout'),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 
@@ -592,13 +579,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _changeLanguage(BuildContext context, String languageCode) {
     final dataProvider = context.dataProvider;
 
-    // Change language
     dataProvider.changeLanguage(languageCode);
 
-    // Close dialog
     Navigator.pop(context);
 
-    // Force rebuild of the entire app by going back to HomeScreen
     if (context.mounted) {
       Navigator.pushAndRemoveUntil(
         context,

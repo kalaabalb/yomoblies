@@ -57,8 +57,7 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  void clearProfileImage() {
-    _profileImagePath = null;
+  void clearProfileData() {
     box.remove('profileImagePath');
     notifyListeners();
   }

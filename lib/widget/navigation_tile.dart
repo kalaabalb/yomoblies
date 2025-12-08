@@ -1,33 +1,38 @@
 import 'package:flutter/material.dart';
-import '../utility/app_color.dart';
+import '../../utility/app_color.dart';
 
 class NavigationTile extends StatelessWidget {
   final IconData icon;
   final String title;
+  final VoidCallback? onTap;
 
-  const NavigationTile({super.key, required this.icon, required this.title});
+  const NavigationTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 5),
-      child: Material(
-        color: Theme.of(context).cardColor, // Use theme card color
-        borderRadius: BorderRadius.circular(10),
-        elevation: 2,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+    return Card(
+      color: Theme.of(context).cardColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColor.darkOrange,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, size: 24, color: Colors.white),
+              Icon(
+                icon,
+                color: AppColor.darkOrange,
+                size: 24,
               ),
-              const SizedBox(width: 20),
+              const SizedBox(width: 16),
               Expanded(
                 child: Text(
                   title,
@@ -40,8 +45,12 @@ class NavigationTile extends StatelessWidget {
               ),
               Icon(
                 Icons.arrow_forward_ios,
-                color: Theme.of(context).textTheme.bodyLarge?.color,
                 size: 16,
+                color: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.color
+                    ?.withOpacity(0.6),
               ),
             ],
           ),

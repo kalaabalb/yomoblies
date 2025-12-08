@@ -1,4 +1,5 @@
 import 'package:e_commerce_flutter/screen/home_screen.dart';
+import 'package:e_commerce_flutter/screen/login_screen/login_screen.dart';
 import 'package:e_commerce_flutter/utility/text_direction_fix.dart';
 import 'screen/product_details_screen/provider/rating_provider.dart';
 import 'screen/login_screen/provider/user_provider.dart';
@@ -57,7 +58,7 @@ class MyApp extends StatelessWidget {
           dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch},
         ),
         debugShowCheckedModeBanner: false,
-        home: const HomeScreen(),
+        home: _getHomeScreen(context),
         theme: AppTheme.lightAppTheme,
         darkTheme: AppTheme.darkAppTheme,
         themeMode: context.watch<DataProvider>().isDarkMode
@@ -81,5 +82,17 @@ class MyApp extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Widget _getHomeScreen(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final user = userProvider.getLoginUsr();
+
+    // Check if user is logged in
+    if (user != null && user.sId != null) {
+      return const HomeScreen();
+    } else {
+      return const LoginScreen();
+    }
   }
 }

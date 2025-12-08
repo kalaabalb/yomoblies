@@ -40,7 +40,6 @@ class ProductGridItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Product Image with Discount Badge
               Stack(
                 children: [
                   Container(
@@ -57,8 +56,6 @@ class ProductGridItem extends StatelessWidget {
                       fit: BoxFit.cover,
                     ),
                   ),
-
-                  // Discount Badge
                   if (hasDiscount)
                     Positioned(
                       top: 8,
@@ -80,8 +77,6 @@ class ProductGridItem extends StatelessWidget {
                         ),
                       ),
                     ),
-
-                  // Favorite Button
                   Positioned(
                     top: 4,
                     right: 4,
@@ -104,8 +99,6 @@ class ProductGridItem extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-
-              // Product Name
               Text(
                 product.name ?? 'Unknown Product',
                 style: const TextStyle(
@@ -116,7 +109,6 @@ class ProductGridItem extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
-
               Consumer<FavoriteProvider>(
                 builder: (context, favoriteProvider, child) {
                   return Row(
@@ -137,8 +129,6 @@ class ProductGridItem extends StatelessWidget {
                   );
                 },
               ),
-
-              // Stock status
               const SizedBox(height: 4),
               Text(
                 product.quantity != 0 ? 'In Stock' : 'Out of Stock',

@@ -1,9 +1,9 @@
+import 'package:e_commerce_flutter/core/data/data_provider.dart';
 import 'package:e_commerce_flutter/screen/product_list_screen/provider/product_list_provider.dart';
-import 'package:e_commerce_flutter/utility/extensions.dart';
+import 'package:e_commerce_flutter/widget/app_bar_action_button.dart';
 import 'package:e_commerce_flutter/widget/universal_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../widget/app_bar_action_button.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   @override
@@ -18,7 +18,6 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _CustomAppBarState extends State<CustomAppBar> {
   late TextEditingController _searchController;
   late FocusNode _searchFocusNode;
-  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -27,11 +26,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
     _searchController =
         TextEditingController(text: productListProvider.searchQuery);
     _searchFocusNode = FocusNode();
-
-    // Initialize after first build
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _isInitialized = true;
-    });
   }
 
   @override
@@ -56,14 +50,15 @@ class _CustomAppBarState extends State<CustomAppBar> {
               },
             ),
             Expanded(
-              child: Consumer<ProductListProvider>(
-                builder: (context, productListProvider, child) {
-                  // Only update controller once after initialization
-                  if (_isInitialized &&
-                      _searchController.text !=
+              child: Consumer2<DataProvider, ProductListProvider>(
+                builder: (context, dataProvider, productListProvider, child) {
+                  // Only update controller if the search query changed from external source
+                  if (_searchController.text !=
                           productListProvider.searchQuery &&
                       !_searchFocusNode.hasFocus) {
-                    _searchController.text = productListProvider.searchQuery;
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _searchController.text = productListProvider.searchQuery;
+                    });
                   }
 
                   return UniversalSearchBar(
@@ -72,10 +67,10 @@ class _CustomAppBarState extends State<CustomAppBar> {
                     onChanged: (val) {
                       productListProvider.searchProducts(
                         val,
-                        context.dataProvider.allProducts,
+                        dataProvider.allProducts,
                       );
                     },
-                    hintText: context.safeDataProvider.safeTranslate(
+                    hintText: dataProvider.safeTranslate(
                       'search_hint',
                       fallback: 'Search...',
                     ),

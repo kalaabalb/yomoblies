@@ -1,7 +1,8 @@
-import '../../../core/data/data_provider.dart';
+import 'package:e_commerce_flutter/core/data/data_provider.dart';
+import 'package:e_commerce_flutter/utility/app_color.dart';
+import 'package:e_commerce_flutter/utility/app_data.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../utility/app_data.dart';
 
 class PosterSection extends StatelessWidget {
   const PosterSection({super.key});
@@ -22,14 +23,10 @@ class PosterSection extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 20),
                 child: Container(
                   width: 300,
-                  decoration: BoxDecoration(
-                    color: AppData.randomPosterBgColors[index],
-                    borderRadius: BorderRadius.circular(15),
-                  ),
+                  decoration: AppData.getPosterDecoration(index),
                   child: Row(
                     children: [
                       Expanded(
-                        // Wrap with Expanded
                         child: Padding(
                           padding: const EdgeInsets.only(left: 20),
                           child: Column(
@@ -37,52 +34,76 @@ class PosterSection extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Flexible(
-                                // Add Flexible for text
                                 child: Text(
                                   '${dataProvider.posters[index].posterName}',
                                   style: Theme.of(context)
                                       .textTheme
                                       .displaySmall
-                                      ?.copyWith(color: Colors.white),
+                                      ?.copyWith(
+                                        color: Colors.black87,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 2,
                                 ),
                               ),
-                              // Removed the "Get Now" button
+                              // Subtle "Get Now" button
                             ],
                           ),
                         ),
                       ),
                       ClipRRect(
-                        // Wrap image with ClipRRect
-                        borderRadius: BorderRadius.circular(15),
-                        child: SizedBox(
-                          width: 120, // Fixed width for image
-                          child: Image.network(
-                            '${dataProvider.posters[index].imageUrl}',
-                            height: 125,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (BuildContext context, Widget child,
-                                ImageChunkEvent? loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes !=
-                                          null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                      : null,
-                                ),
-                              );
-                            },
-                            errorBuilder: (BuildContext context,
-                                Object exception, StackTrace? stackTrace) {
-                              return Container(
-                                color: Colors.grey[200],
-                                child:
-                                    const Icon(Icons.error, color: Colors.red),
-                              );
-                            },
+                        borderRadius: const BorderRadius.only(
+                          topRight: Radius.circular(15),
+                          bottomRight: Radius.circular(15),
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.centerRight,
+                              end: Alignment.centerLeft,
+                              colors: [
+                                Colors.white.withOpacity(0.3),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                          child: SizedBox(
+                            width: 120,
+                            child: Image.network(
+                              '${dataProvider.posters[index].imageUrl}',
+                              height: 125,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent? loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                        : null,
+                                    color: AppColor.darkOrange,
+                                  ),
+                                );
+                              },
+                              errorBuilder: (BuildContext context,
+                                  Object exception, StackTrace? stackTrace) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    gradient: AppData.getRandomGentleGradient(),
+                                  ),
+                                  child: Icon(
+                                    Icons.image,
+                                    color: AppColor.textSecondary,
+                                    size: 40,
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),

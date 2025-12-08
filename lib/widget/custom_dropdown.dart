@@ -1,64 +1,84 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
+// widgets/custom_dropdown.dart
 import 'package:flutter/material.dart';
 
-class CustomDropdown<T> extends StatelessWidget {
-  final T? initialValue;
-  final Color? bgColor;
-  final List<T> items;
-  final void Function(T?) onChanged;
-  final String? Function(T?)? validator;
+class CustomDropdown<T> extends StatefulWidget {
   final String hintText;
+  final List<T> items;
+  final T? value;
+  final ValueChanged<T?>? onChanged;
   final String Function(T) displayItem;
+  final TextStyle? hintStyle;
+  final TextStyle? itemStyle;
+  final Color? dropdownColor;
 
   const CustomDropdown({
     super.key,
-    this.initialValue,
+    required this.hintText,
     required this.items,
-    required this.onChanged,
-    this.validator,
-    this.hintText = 'Select an option',
-    required this.displayItem, this.bgColor,
+    this.value,
+    this.onChanged,
+    required this.displayItem,
+    this.hintStyle,
+    this.itemStyle,
+    this.dropdownColor,
   });
 
   @override
+  State<CustomDropdown<T>> createState() => _CustomDropdownState<T>();
+}
+
+class _CustomDropdownState<T> extends State<CustomDropdown<T>> {
+  @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Center(
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton2<T>(
-            isExpanded: true,
-            hint: Text(
-              hintText,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).hintColor,
-              ),
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.grey[800] : Colors.grey[100],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T>(
+          value: widget.value,
+          hint: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              widget.hintText,
+              style: widget.hintStyle ??
+                  TextStyle(
+                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                  ),
             ),
-            items: items.map((T value) {
-              return DropdownMenuItem<T>(
-                value: value,
-                child: Container(
-                  height: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text(displayItem(value), style: const TextStyle(fontSize: 14)),
+          ),
+          isExpanded: true,
+          items: widget.items.map((T item) {
+            return DropdownMenuItem<T>(
+              value: item,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  widget.displayItem(item),
+                  style: widget.itemStyle ??
+                      TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black87,
+                      ),
                 ),
-              );
-            }).toList(),
-            value: initialValue,
-            onChanged: onChanged,
-            buttonStyleData: ButtonStyleData(
-              padding: EdgeInsets.only(left: 16, right: 8),
-              height: 50,
-              decoration: BoxDecoration(
-                color: bgColor ?? Colors.grey[200],
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8.0),
               ),
+            );
+          }).toList(),
+          onChanged: widget.onChanged,
+          dropdownColor: widget.dropdownColor ??
+              (isDarkMode ? Colors.grey[900] : Colors.white),
+          icon: Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Icon(
+              Icons.arrow_drop_down,
+              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
             ),
-            menuItemStyleData: const MenuItemStyleData(
-              height: 40,
-              padding: EdgeInsets.zero,
-            ),
+          ),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: isDarkMode ? Colors.white : Colors.black87,
           ),
         ),
       ),

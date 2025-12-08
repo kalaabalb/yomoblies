@@ -1,17 +1,15 @@
 import 'dart:ui';
-import 'package:e_commerce_flutter/utility/snack_bar_helper.dart';
-import 'package:e_commerce_flutter/widget/compleate_order_button.dart';
-import '../provider/cart_provider.dart';
-import '../../../utility/extensions.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:e_commerce_flutter/core/data/data_provider.dart';
+import 'package:e_commerce_flutter/screen/product_cart_screen/provider/cart_provider.dart';
+import 'package:e_commerce_flutter/shared/widgets/cards.dart';
+import 'package:e_commerce_flutter/shared/widgets/forms.dart';
+import 'package:e_commerce_flutter/utility/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../widget/custom_text_field.dart';
-import '../../../shared/widgets/cards.dart';
-import '../../../shared/widgets/forms.dart';
 
 void showCustomBottomSheet(BuildContext context) {
-  final cartProvider = context.cartProvider;
+  final cartProvider = context.read<CartProvider>();
+  final dataProvider = context.read<DataProvider>();
   cartProvider.retrieveSavedAddress();
 
   showModalBottomSheet(
@@ -47,7 +45,7 @@ void showCustomBottomSheet(BuildContext context) {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            context.dataProvider.safeTranslate(
+                            dataProvider.safeTranslate(
                               'complete_order',
                               fallback: 'Complete Order',
                             ),
@@ -68,7 +66,7 @@ void showCustomBottomSheet(BuildContext context) {
                       CustomCard(
                         child: ListTile(
                           title: Text(
-                            context.dataProvider.safeTranslate(
+                            dataProvider.safeTranslate(
                               'enter_address',
                               fallback: 'Enter Shipping Address',
                             ),
@@ -143,7 +141,7 @@ void showCustomBottomSheet(BuildContext context) {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                context.dataProvider.safeTranslate(
+                                dataProvider.safeTranslate(
                                   'payment_method',
                                   fallback: 'Payment Method',
                                 ),
@@ -288,7 +286,7 @@ void showCustomBottomSheet(BuildContext context) {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   InfoCard(
-                                    title: context.dataProvider.safeTranslate(
+                                    title: dataProvider.safeTranslate(
                                       'total_amount',
                                       fallback: 'Subtotal:',
                                     ),
@@ -298,7 +296,7 @@ void showCustomBottomSheet(BuildContext context) {
                                   const SizedBox(height: 8),
                                   const Divider(),
                                   InfoCard(
-                                    title: context.dataProvider.safeTranslate(
+                                    title: dataProvider.safeTranslate(
                                       'grand_total',
                                       fallback: 'Grand Total:',
                                     ),
@@ -317,9 +315,7 @@ void showCustomBottomSheet(BuildContext context) {
                       // Pay Button with loading state
                       Consumer<CartProvider>(
                         builder: (context, cartProvider, child) {
-                          return CompleteOrderButton(
-                            labelText:
-                                '${context.dataProvider.safeTranslate('complete_order', fallback: 'Complete Order')} - Birr ${cartProvider.getGrandTotal().toStringAsFixed(2)}',
+                          return ElevatedButton(
                             onPressed: cartProvider.isProcessingPayment
                                 ? null
                                 : () {
@@ -335,15 +331,35 @@ void showCustomBottomSheet(BuildContext context) {
                                           .save();
                                       cartProvider.submitOrder(context);
                                     } else {
-                                      SnackBarHelper.showErrorSnackBar(
-                                        context.dataProvider.safeTranslate(
-                                          'please_fill_all_fields',
-                                          fallback:
-                                              'Please fill all required fields',
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content:
+                                              Text(dataProvider.safeTranslate(
+                                            'please_fill_all_fields',
+                                            fallback:
+                                                'Please fill all required fields',
+                                          )),
+                                          backgroundColor: Colors.red,
                                         ),
                                       );
                                     }
                                   },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColor.darkOrange,
+                              minimumSize: const Size(double.infinity, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: Text(
+                              '${dataProvider.safeTranslate('complete_order', fallback: 'Complete Order')} - Birr ${cartProvider.getGrandTotal().toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                           );
                         },
                       ),

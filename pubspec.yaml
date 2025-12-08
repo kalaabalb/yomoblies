@@ -25,9 +25,9 @@ dependencies:
   image_picker: ^1.0.4
   flutter_stripe: ^10.1.1
   cached_network_image: ^3.4.1
-  # razorpay_flutter: ^1.4.0  # Commented out for now
   onesignal_flutter: ^5.1.6
-  flutter_launcher_icons: ^0.13.1  # ADD THIS LINE
+  flutter_launcher_icons: ^0.13.1 
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:
