@@ -5,6 +5,8 @@ import 'package:e_commerce_flutter/shared/widgets/cards.dart';
 import 'package:e_commerce_flutter/shared/widgets/forms.dart';
 import 'package:e_commerce_flutter/utility/app_color.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 void showCustomBottomSheet(BuildContext context) {
@@ -123,6 +125,7 @@ void showCustomBottomSheet(BuildContext context) {
                                       cartProvider.postalCodeController,
                                   countryController:
                                       cartProvider.countryController,
+                                  onMapPick: () => _showMapPicker(context),
                                   validator: (value) => value!.isEmpty
                                       ? 'This field is required'
                                       : null,
@@ -442,5 +445,151 @@ Widget _buildPaymentOption(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     ),
+  );
+}
+
+// Show the Google Maps picker dialog with reverse geocoding
+Future<void> _showMapPicker(BuildContext context) async {
+  final cartProvider = context.read<CartProvider>();
+
+  LatLng? selectedLocation;
+
+  // Default to Addis Ababa if no location is set yet
+  final initialLocation =
+      cartProvider.latitude != null && cartProvider.longitude != null
+          ? LatLng(cartProvider.latitude!, cartProvider.longitude!)
+          : const LatLng(9.0108, 38.7612); // Addis Ababa center
+
+  await showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (dialogContext) {
+      return Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.7,
+          child: Column(
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Select Delivery Location',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(dialogContext),
+                    ),
+                  ],
+                ),
+              ),
+              // Map
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: initialLocation,
+                      zoom: 14,
+                    ),
+                    onTap: (latLng) {
+                      selectedLocation = latLng;
+                    },
+                    markers: selectedLocation != null
+                        ? {
+                            Marker(
+                              markerId: const MarkerId('selected-location'),
+                              position: selectedLocation!,
+                              infoWindow: const InfoWindow(
+                                title: 'Delivery Location',
+                              ),
+                            ),
+                          }
+                        : {},
+                  ),
+                ),
+              ),
+              // Footer with Confirm button
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: selectedLocation == null
+                            ? null
+                            : () async {
+                                // Reverse geocode the selected location
+                                try {
+                                  final placemarks =
+                                      await placemarkFromCoordinates(
+                                    selectedLocation!.latitude,
+                                    selectedLocation!.longitude,
+                                  );
+
+                                  if (placemarks.isNotEmpty) {
+                                    final placemark = placemarks.first;
+                                    cartProvider.streetController.text =
+                                        placemark.street?.isNotEmpty == true
+                                            ? placemark.street!
+                                            : placemark.thoroughfare ?? '';
+                                    cartProvider.cityController.text =
+                                        placemark.locality ??
+                                            placemark.subAdministrativeArea ??
+                                            '';
+                                    cartProvider.stateController.text =
+                                        placemark.administrativeArea ?? '';
+                                    cartProvider.postalCodeController.text =
+                                        placemark.postalCode ?? '';
+                                    cartProvider.countryController.text =
+                                        placemark.country ?? '';
+                                  }
+
+                                  // Cache GPS coordinates
+                                  cartProvider.setCoordinates(
+                                    selectedLocation!.latitude,
+                                    selectedLocation!.longitude,
+                                  );
+
+                                  if (dialogContext.mounted) {
+                                    Navigator.pop(dialogContext);
+                                  }
+                                } catch (e) {
+                                  // Even if geocoding fails, still save coordinates
+                                  cartProvider.setCoordinates(
+                                    selectedLocation!.latitude,
+                                    selectedLocation!.longitude,
+                                  );
+                                  if (dialogContext.mounted) {
+                                    Navigator.pop(dialogContext);
+                                  }
+                                }
+                              },
+                        icon: const Icon(Icons.check),
+                        label: const Text('Confirm Location'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColor.darkOrange,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
   );
 }

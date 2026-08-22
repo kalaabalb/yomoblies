@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../login_screen/provider/user_provider.dart';
+import '../../profile_screen/provider/profile_provider.dart';
 import '../../../services/http_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cart/flutter_cart.dart';
@@ -12,25 +13,35 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../models/api_response.dart';
 import '../../../utility/snack_bar_helper.dart';
+import '../../../utility/constants.dart';
 
 class CartProvider extends ChangeNotifier {
-  HttpService service = HttpService();
+  final HttpService service = HttpService();
   final box = GetStorage();
-  var flutterCart = FlutterCart();
+  final FlutterCart flutterCart = FlutterCart();
   List<CartModel> myCartItems = [];
 
+  // Use shared storage keys for address synchronization with ProfileProvider
+  static const String _savedAddressKey = 'savedAddress';
+  static const String _defaultPaymentOption = 'cod';
+
   final GlobalKey<FormState> buyNowFormKey = GlobalKey<FormState>();
-  TextEditingController phoneController = TextEditingController();
-  TextEditingController streetController = TextEditingController();
-  TextEditingController cityController = TextEditingController();
-  TextEditingController stateController = TextEditingController();
-  TextEditingController postalCodeController = TextEditingController();
-  TextEditingController countryController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController streetController = TextEditingController();
+  final TextEditingController cityController = TextEditingController();
+  final TextEditingController stateController = TextEditingController();
+  final TextEditingController postalCodeController = TextEditingController();
+  final TextEditingController countryController = TextEditingController();
   bool isExpanded = false;
 
-  String selectedPaymentOption = 'cod';
+  // GPS coordinates from map picker
+  double? _latitude;
+  double? _longitude;
+  double? get latitude => _latitude;
+  double? get longitude => _longitude;
 
-  // QR Screenshot related
+  String selectedPaymentOption = _defaultPaymentOption;
+
   File? _paymentProofImage;
   File? get paymentProofImage => _paymentProofImage;
   bool _isUploadingPaymentProof = false;
@@ -38,11 +49,9 @@ class CartProvider extends ChangeNotifier {
   String? _paymentProofUrl;
   String? get paymentProofUrl => _paymentProofUrl;
 
-  // Payment method states
   bool _showPaymentInstructions = false;
   bool get showPaymentInstructions => _showPaymentInstructions;
 
-  // Loading states
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -54,8 +63,7 @@ class CartProvider extends ChangeNotifier {
     retrieveSavedAddress();
   }
 
-  // Get cart items
-  getCartItems() {
+  void getCartItems() {
     try {
       myCartItems = List<CartModel>.from(flutterCart.cartItemsList);
 
@@ -66,11 +74,8 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  void updateUI() {
-    notifyListeners();
-  }
+  void updateUI() => notifyListeners();
 
-  // Add item to cart
   void addToCart({
     required String productId,
     required String productName,
@@ -121,7 +126,6 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  // Update cart quantity
   void updateCart(CartModel cartItem, int quantity) {
     try {
       int newQuantity = cartItem.quantity + quantity;
@@ -157,9 +161,7 @@ class CartProvider extends ChangeNotifier {
   }
 
   double getCartSubTotal() {
-    double subtotal = flutterCart.subtotal;
-
-    return subtotal;
+    return flutterCart.subtotal;
   }
 
   void clearCartItems() {
@@ -169,12 +171,10 @@ class CartProvider extends ChangeNotifier {
   }
 
   double getGrandTotal() {
-    double grandTotal = getCartSubTotal();
-    print('🟡 Grand total: Birr ${grandTotal.toStringAsFixed(2)}');
+    final grandTotal = getCartSubTotal();
     return grandTotal > 0 ? grandTotal : 0;
   }
 
-  // Pick QR Screenshot from gallery
   Future<void> pickPaymentProofImage() async {
     try {
       final ImagePicker picker = ImagePicker();
@@ -187,11 +187,10 @@ class CartProvider extends ChangeNotifier {
 
       if (image != null) {
         _paymentProofImage = File(image.path);
-        _paymentProofUrl = null; // Clear previous URL
+        _paymentProofUrl = null;
         notifyListeners();
         SnackBarHelper.showSuccessSnackBar('Payment proof image selected');
 
-        // Auto-upload the image
         await uploadPaymentProof();
       }
     } catch (e) {
@@ -199,7 +198,6 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  // Remove selected QR screenshot
   void removePaymentProofImage() {
     _paymentProofImage = null;
     _paymentProofUrl = null;
@@ -243,7 +241,6 @@ class CartProvider extends ChangeNotifier {
           if (imageUrl != null && imageUrl.isNotEmpty) {
             _paymentProofUrl = imageUrl;
 
-            // Force UI update
             notifyListeners();
             return true;
           }
@@ -274,23 +271,20 @@ class CartProvider extends ChangeNotifier {
         return;
       }
 
-      // Determine order and payment status based on payment method
-      String orderStatus = 'pending';
-      String paymentStatus = 'pending';
+      // Step A: Cache the final total amount BEFORE clearing any states
+      final double finalAmount = getGrandTotal();
+      final double finalSubtotal = getCartSubTotal();
 
-      if (selectedPaymentOption == 'cod') {
-        orderStatus = 'pending';
-        paymentStatus = 'pending';
-      } else {
-        orderStatus = 'payment_pending';
-        paymentStatus = 'pending';
-      }
+      final bool isCashOnDelivery = selectedPaymentOption == 'cod';
+      final String orderStatus =
+          isCashOnDelivery ? 'pending' : 'payment_pending';
+      const String paymentStatus = 'pending';
 
       Map<String, dynamic> order = {
         'userID': user.sId ?? '',
         'orderStatus': orderStatus,
         'items': cartItemToOrderItem(myCartItems),
-        'totalPrice': getGrandTotal(),
+        'totalPrice': finalAmount,
         'shippingAddress': {
           'phone': phoneController.text,
           'street': streetController.text,
@@ -298,6 +292,8 @@ class CartProvider extends ChangeNotifier {
           'state': stateController.text,
           'postalCode': postalCodeController.text,
           'country': countryController.text,
+          'latitude': _latitude,
+          'longitude': _longitude,
         },
         'paymentMethod': selectedPaymentOption,
         'paymentStatus': paymentStatus,
@@ -309,11 +305,12 @@ class CartProvider extends ChangeNotifier {
               }
             : null,
         'orderTotal': {
-          "subtotal": getCartSubTotal(),
-          "total": getGrandTotal(),
+          "subtotal": finalSubtotal,
+          "total": finalAmount,
         },
       };
 
+      // Step B: Process the network request to submit the order
       final response = await service.addItem(
         endpointUrl: 'orders',
         itemData: order,
@@ -324,6 +321,8 @@ class CartProvider extends ChangeNotifier {
         if (apiResponse.success == true) {
           SnackBarHelper.showSuccessSnackBar('Order created successfully!');
           saveAddress();
+          // Synchronize address with ProfileProvider
+          _syncAddressWithProfileProvider(context);
           clearCartItems();
           _paymentProofImage = null;
           _paymentProofUrl = null;
@@ -332,9 +331,9 @@ class CartProvider extends ChangeNotifier {
             Navigator.of(context).pop();
           }
 
-          // Navigate to orders screen
+          // Step C: Pass the cached finalAmount explicitly to the dialog
           Future.delayed(const Duration(milliseconds: 500), () {
-            _showOrderConfirmation(context);
+            _showOrderConfirmation(context, finalAmount: finalAmount);
           });
         } else {
           SnackBarHelper.showErrorSnackBar(
@@ -342,8 +341,8 @@ class CartProvider extends ChangeNotifier {
           );
         }
       } else {
-        print(
-            '🔴 [ADD ORDER] HTTP Error: ${response.statusCode} - ${response.body}');
+        debugPrint(
+            'ADD ORDER HTTP Error: ${response.statusCode} - ${response.body}');
         SnackBarHelper.showErrorSnackBar(
           'Failed to create order: ${response.statusText}',
         );
@@ -356,7 +355,25 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  void _showOrderConfirmation(BuildContext context) {
+  // Synchronize address with ProfileProvider so both screens stay in sync
+  void _syncAddressWithProfileProvider(BuildContext context) {
+    try {
+      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+      profileProvider.phoneController.text = phoneController.text;
+      profileProvider.streetController.text = streetController.text;
+      profileProvider.cityController.text = cityController.text;
+      profileProvider.stateController.text = stateController.text;
+      profileProvider.postalCodeController.text = postalCodeController.text;
+      profileProvider.countryController.text = countryController.text;
+      // Persist to shared storage
+      profileProvider.storeAddress();
+    } catch (e) {
+      debugPrint('Failed to sync address with ProfileProvider: $e');
+    }
+  }
+
+  void _showOrderConfirmation(BuildContext context,
+      {required double finalAmount}) {
     Get.dialog(
       AlertDialog(
         title: const Text('🎉 Order Confirmed!'),
@@ -366,7 +383,7 @@ class CartProvider extends ChangeNotifier {
           children: [
             Text(
                 'Payment Method: ${_getPaymentMethodDisplayName(selectedPaymentOption)}'),
-            Text('Total Amount: Birr ${getGrandTotal().toStringAsFixed(2)}'),
+            Text('Total Amount: Birr ${finalAmount.toStringAsFixed(2)}'),
             const SizedBox(height: 10),
             if (selectedPaymentOption != 'cod')
               const Column(
@@ -392,7 +409,7 @@ class CartProvider extends ChangeNotifier {
           TextButton(
             onPressed: () {
               Get.back();
-              // Navigate to home screen
+              // Completely reset navigation stack to home dashboard
               Get.offAllNamed('/');
             },
             child: const Text('🛍️ Continue Shopping'),
@@ -423,35 +440,28 @@ class CartProvider extends ChangeNotifier {
 
     buyNowFormKey.currentState!.save();
 
-    // Validate address if expanded
     if (isExpanded) {
       if (phoneController.text.isEmpty ||
           streetController.text.isEmpty ||
           cityController.text.isEmpty ||
           stateController.text.isEmpty ||
-          postalCodeController.text.isEmpty ||
           countryController.text.isEmpty) {
         SnackBarHelper.showErrorSnackBar('Please fill all address fields');
         return;
       }
     }
 
-    // Show payment instructions for bank/telebirr methods
     if (selectedPaymentOption == 'cbe') {
       final result = await _showCBEPaymentInstructions(context);
       if (result == true) {
         await addOrder(context);
-      } else {}
+      }
     } else if (selectedPaymentOption == 'telebirr') {
       final result = await _showTelebirrPaymentInstructions(context);
       if (result == true) {
-        print(
-            '🟡 [SUBMIT ORDER] Telebirr payment confirmed, creating order...');
         await addOrder(context);
-      } else {}
+      }
     } else {
-      // Directly create order for COD
-
       await addOrder(context);
     }
   }
@@ -474,8 +484,6 @@ class CartProvider extends ChangeNotifier {
                       style: TextStyle(fontSize: 14),
                     ),
                     const SizedBox(height: 15),
-
-                    // CBE Birr App Instructions
                     _buildPaymentInstructionCard(
                       icon: Icons.phone_android,
                       title: 'CBE Birr App',
@@ -486,31 +494,20 @@ class CartProvider extends ChangeNotifier {
                         '4. Amount: Birr ${getGrandTotal().toStringAsFixed(2)}',
                       ],
                     ),
-
                     const SizedBox(height: 10),
-
-                    // Bank Transfer Instructions
                     _buildPaymentInstructionCard(
                       icon: Icons.account_balance,
                       title: 'Bank Transfer',
                       instructions: [
-                        'Account Name:YONAS AMBELU',
+                        'Account Name: YONAS AMBELU',
                         'Account Number: 1000402270202',
                         'Bank: Commercial Bank of Ethiopia',
                         'Reference: ORDER-${DateTime.now().millisecondsSinceEpoch}',
                         'Amount: Birr ${getGrandTotal().toStringAsFixed(2)}',
                       ],
                     ),
-
                     const SizedBox(height: 15),
-
-                    // QR Screenshot Upload Section
-                    Consumer<CartProvider>(
-                      builder: (context, cartProvider, child) {
-                        return _buildPaymentProofUploadSection();
-                      },
-                    ),
-
+                    _buildPaymentProofUploadSection(),
                     const SizedBox(height: 10),
                     const Text(
                       '💡 After payment, upload the screenshot and click "Confirm Payment".',
@@ -530,14 +527,10 @@ class CartProvider extends ChangeNotifier {
                 Consumer<CartProvider>(
                   builder: (context, cartProvider, child) {
                     final isReady = cartProvider.isPaymentProofReady;
-                    print(
-                        '🟡 [DIALOG] Confirm button - isReady: $isReady, URL: ${cartProvider.paymentProofUrl}');
 
                     return TextButton(
                       onPressed: isReady
                           ? () {
-                              print(
-                                  '🟡 [DIALOG] Confirm pressed with proof URL: ${cartProvider.paymentProofUrl}');
                               Get.back(result: true);
                             }
                           : null,
@@ -571,8 +564,6 @@ class CartProvider extends ChangeNotifier {
                       style: TextStyle(fontSize: 14),
                     ),
                     const SizedBox(height: 15),
-
-                    // Telebirr Instructions
                     _buildPaymentInstructionCard(
                       icon: Icons.phone_android,
                       title: 'Telebirr App',
@@ -584,16 +575,8 @@ class CartProvider extends ChangeNotifier {
                         '5. Use reference: ORDER-${DateTime.now().millisecondsSinceEpoch}',
                       ],
                     ),
-
                     const SizedBox(height: 15),
-
-                    // QR Screenshot Upload Section
-                    Consumer<CartProvider>(
-                      builder: (context, cartProvider, child) {
-                        return _buildPaymentProofUploadSection();
-                      },
-                    ),
-
+                    _buildPaymentProofUploadSection(),
                     const SizedBox(height: 10),
                     const Text(
                       '💡 After payment, upload the screenshot and click "Confirm Payment".',
@@ -686,8 +669,6 @@ class CartProvider extends ChangeNotifier {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-
-            // Preview container
             Container(
               width: 200,
               height: 200,
@@ -700,10 +681,7 @@ class CartProvider extends ChangeNotifier {
               ),
               child: cartProvider.buildProofPreview(),
             ),
-
             const SizedBox(height: 10),
-
-            // Status text
             if (hasProof)
               const Text(
                 '✓ Proof uploaded successfully',
@@ -722,9 +700,7 @@ class CartProvider extends ChangeNotifier {
                 'No proof uploaded yet',
                 style: TextStyle(color: Colors.grey),
               ),
-
             const SizedBox(height: 10),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -802,28 +778,45 @@ class CartProvider extends ChangeNotifier {
         _paymentProofUrl != null && _paymentProofUrl!.isNotEmpty;
     final hasImage = _paymentProofImage != null;
 
-    print(
-        '🟡 [PROOF CHECK] URL: $_paymentProofUrl, Image: $hasImage, Ready: ${hasValidUrl || hasImage}');
     return hasValidUrl || hasImage;
   }
 
-  // Address management
+  void setCoordinates(double? lat, double? lng) {
+    _latitude = lat;
+    _longitude = lng;
+    notifyListeners();
+  }
+
   void retrieveSavedAddress() {
     try {
-      final savedAddress = box.read('savedAddress');
-      if (savedAddress != null) {
-        phoneController.text = savedAddress['phone'] ?? '';
-        streetController.text = savedAddress['street'] ?? '';
-        cityController.text = savedAddress['city'] ?? '';
-        stateController.text = savedAddress['state'] ?? '';
-        postalCodeController.text = savedAddress['postalCode'] ?? '';
-        countryController.text = savedAddress['country'] ?? '';
+      // First try to load from ProfileProvider's shared keys
+      phoneController.text = box.read(PHONE_KEY) ?? '';
+      streetController.text = box.read(STREET_KEY) ?? '';
+      cityController.text = box.read(CITY_KEY) ?? '';
+      stateController.text = box.read(STATE_KEY) ?? '';
+      postalCodeController.text = box.read(POSTAL_CODE_KEY) ?? '';
+      countryController.text = box.read(COUNTRY_KEY) ?? '';
+      
+      // Fallback to legacy saved address if shared keys are empty
+      if (phoneController.text.isEmpty && 
+          streetController.text.isEmpty && 
+          cityController.text.isEmpty) {
+        final savedAddress = box.read(_savedAddressKey);
+        if (savedAddress != null) {
+          phoneController.text = savedAddress['phone'] ?? '';
+          streetController.text = savedAddress['street'] ?? '';
+          cityController.text = savedAddress['city'] ?? '';
+          stateController.text = savedAddress['state'] ?? '';
+          postalCodeController.text = savedAddress['postalCode'] ?? '';
+          countryController.text = savedAddress['country'] ?? '';
+        }
       }
     } catch (e) {}
   }
 
   void saveAddress() {
     try {
+      // Save to both legacy key and shared ProfileProvider keys
       final address = {
         'phone': phoneController.text,
         'street': streetController.text,
@@ -832,8 +825,27 @@ class CartProvider extends ChangeNotifier {
         'postalCode': postalCodeController.text,
         'country': countryController.text,
       };
-      box.write('savedAddress', address);
+      box.write(_savedAddressKey, address);
+      
+      // Also save to shared keys for ProfileProvider synchronization
+      box.write(PHONE_KEY, phoneController.text);
+      box.write(STREET_KEY, streetController.text);
+      box.write(CITY_KEY, cityController.text);
+      box.write(STATE_KEY, stateController.text);
+      box.write(POSTAL_CODE_KEY, postalCodeController.text);
+      box.write(COUNTRY_KEY, countryController.text);
     } catch (e) {}
+  }
+
+  // New method to sync address from ProfileProvider (call when Profile updates)
+  void syncFromProfileProvider(ProfileProvider profileProvider) {
+    phoneController.text = profileProvider.phoneController.text;
+    streetController.text = profileProvider.streetController.text;
+    cityController.text = profileProvider.cityController.text;
+    stateController.text = profileProvider.stateController.text;
+    postalCodeController.text = profileProvider.postalCodeController.text;
+    countryController.text = profileProvider.countryController.text;
+    notifyListeners();
   }
 
   void togglePaymentInstructions() {
@@ -860,7 +872,7 @@ class CartProvider extends ChangeNotifier {
     countryController.clear();
     _paymentProofImage = null;
     _paymentProofUrl = null;
-    selectedPaymentOption = 'cod';
+    selectedPaymentOption = _defaultPaymentOption;
     isExpanded = false;
     notifyListeners();
   }

@@ -93,8 +93,14 @@ app.*.map.json
 
 # Exclude backup files
 *.backup
+*.bak
+*.orig
+*.old
+*~
 *_backup.txt
 server_backup_*.txt
+pubspec_old.yaml
+pubspec.yaml.bak
 
 # Exclude extracted code files
 all_code*.txt
@@ -109,6 +115,9 @@ flutter_native_splash.yaml
 # Temporary files
 *.tmp
 *.temp
+
+# Accidental duplicate asset tree
+assets/assets/
 
 # Admin panel files (separate project)
 ../admin_panal_start/

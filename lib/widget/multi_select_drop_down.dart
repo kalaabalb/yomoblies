@@ -1,6 +1,5 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-import '../utility/app_color.dart';
 
 class MultiSelectDropDown<T> extends StatelessWidget {
   final String? hintText;

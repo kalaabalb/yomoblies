@@ -8,10 +8,6 @@ class BottomNavyBarItem {
   final Color activeColor;
   final Color inActiveColor;
 
-  const BottomNavyBarItem(
-    this.title,
-    this.icon,
-    this.activeColor,
-    [this.inActiveColor = Colors.grey]
-  );
+  const BottomNavyBarItem(this.title, this.icon, this.activeColor,
+      [this.inActiveColor = Colors.grey]);
 }

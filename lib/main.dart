@@ -67,19 +67,7 @@ class MyApp extends StatelessWidget {
         locale: const Locale('en', 'US'),
         supportedLocales: const [Locale('en', 'US')],
         fallbackLocale: const Locale('en', 'US'),
-        builder: (context, child) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              textScaleFactor: MediaQuery.of(
-                context,
-              ).textScaleFactor.clamp(0.8, 1.2),
-            ),
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: child!,
-            ),
-          );
-        },
+        builder: (context, child) => child!,
       ),
     );
   }

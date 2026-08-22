@@ -15,10 +15,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
-    }
-
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.flutter_ecommerce_new"
@@ -30,26 +26,27 @@ android {
         versionName = flutter.versionName
     }
 
-   buildTypes {
-    release {
-        // Keep this signing config so it can still build
-        signingConfig = signingConfigs.getByName("debug")
+    buildTypes {
+        release {
+            // Keep this signing config so it can still build
+            signingConfig = signingConfigs.getByName("debug")
 
-        // Enable code shrinking and resource shrinking
-        isMinifyEnabled = true
-        isShrinkResources = true
+            // Enable code shrinking and resource shrinking
+            isMinifyEnabled = true
+            isShrinkResources = true
 
-        // Link the proguard rules file
-        proguardFiles(
-            getDefaultProguardFile("proguard-android-optimize.txt"),
-            "proguard-rules.pro"
-        )
+            // Link the proguard rules file
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
     }
 }
 
-
-}
-
-flutter {
-    source = "../.."
+// Keep Kotlin compilation aligned with Java target compatibility.
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+    }
 }

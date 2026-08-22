@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 
 class NetworkUtils {
   static Future<bool> checkServerConnection(String baseUrl) async {
@@ -8,7 +9,7 @@ class NetworkUtils {
           .timeout(const Duration(seconds: 10));
       return response.statusCode == 200;
     } catch (e) {
-      print('🔴 Server connection failed: $e');
+      debugPrint('Server connection failed: $e');
       return false;
     }
   }

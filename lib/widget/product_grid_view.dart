@@ -29,9 +29,9 @@ class ProductGridView extends StatelessWidget {
       itemCount: items.length,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 220,
         childAspectRatio: 10 / 16,
-        crossAxisCount: 2,
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
       ),
@@ -42,23 +42,29 @@ class ProductGridView extends StatelessWidget {
             final isFavorite =
                 favoriteProvider.checkIsItemFavorite(product.sId!);
 
-            return ProductGridItem(
-              product: product,
-              onTap: () {
-                // Navigate directly to product details
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ProductDetailScreen(product),
-                  ),
-                );
-              },
-              onFavoriteTap: () {
-                favoriteProvider.updateToFavoriteList(product.sId!);
-                favoriteProvider
-                    .loadFavoriteItems(context.dataProvider.allProducts);
-              },
-              isFavorite: isFavorite,
+            // Constrain card width for desktop layouts
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 280),
+                child: ProductGridItem(
+                  product: product,
+                  onTap: () {
+                    // Navigate directly to product details
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProductDetailScreen(product),
+                      ),
+                    );
+                  },
+                  onFavoriteTap: () {
+                    favoriteProvider.updateToFavoriteList(product.sId!);
+                    favoriteProvider
+                        .loadFavoriteItems(context.dataProvider.allProducts);
+                  },
+                  isFavorite: isFavorite,
+                ),
+              ),
             );
           },
         );

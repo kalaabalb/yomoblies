@@ -47,6 +47,7 @@ class AddressFormFields extends StatelessWidget {
   final TextEditingController postalCodeController;
   final TextEditingController countryController;
   final String? Function(String?)? validator;
+  final VoidCallback? onMapPick;
 
   const AddressFormFields({
     super.key,
@@ -57,12 +58,35 @@ class AddressFormFields extends StatelessWidget {
     required this.postalCodeController,
     required this.countryController,
     this.validator,
+    this.onMapPick,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Map picker button
+        if (onMapPick != null) ...[
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onMapPick,
+              icon: const Icon(Icons.map_outlined, color: AppColor.darkOrange),
+              label: const Text(
+                'Select Location on Map',
+                style: TextStyle(color: AppColor.darkOrange),
+              ),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                side: const BorderSide(color: AppColor.darkOrange),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
         CustomTextField(
           controller: phoneController,
           labelText: 'Phone',
@@ -97,11 +121,16 @@ class AddressFormFields extends StatelessWidget {
             Expanded(
               child: CustomTextField(
                 controller: postalCodeController,
-                labelText: 'Postal Code',
+                labelText: 'Postal Code (Optional)',
                 inputType: TextInputType.number,
                 validator: validator ??
-                    (value) =>
-                        value!.isEmpty ? 'Please enter postal code' : null,
+                    (value) {
+                      // Postal code is optional - allow null or empty
+                      if (value == null || value.isEmpty) {
+                        return null;
+                      }
+                      return null;
+                    },
               ),
             ),
             const SizedBox(width: 16),

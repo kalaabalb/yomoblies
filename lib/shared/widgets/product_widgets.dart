@@ -113,7 +113,7 @@ class ProductGridItem extends StatelessWidget {
                 builder: (context, favoriteProvider, child) {
                   return Row(
                     children: [
-                      Expanded(
+                      Flexible(
                         child: Text(
                           "Birr ${product.offerPrice ?? product.price}",
                           style: TextStyle(
@@ -125,6 +125,21 @@ class ProductGridItem extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      if (hasDiscount) ...[
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            'Birr ${product.price}',
+                            style: const TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ],
                   );
                 },
@@ -136,6 +151,8 @@ class ProductGridItem extends StatelessWidget {
                   color: product.quantity != 0 ? Colors.green : Colors.red,
                   fontSize: 12,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

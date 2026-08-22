@@ -8,6 +8,7 @@ import '../../../utility/constants.dart';
 
 class ProfileProvider extends ChangeNotifier {
   final GetStorage box = GetStorage();
+  static const String _profileImagePathKey = 'profileImagePath';
 
   // Address form controllers
   final GlobalKey<FormState> addressFormKey = GlobalKey<FormState>();
@@ -17,6 +18,12 @@ class ProfileProvider extends ChangeNotifier {
   final TextEditingController stateController = TextEditingController();
   final TextEditingController postalCodeController = TextEditingController();
   final TextEditingController countryController = TextEditingController();
+
+  // GPS coordinates from map picker
+  double? _latitude;
+  double? _longitude;
+  double? get latitude => _latitude;
+  double? get longitude => _longitude;
 
   String? _profileImagePath;
 
@@ -28,7 +35,7 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   void _loadProfileImage() {
-    _profileImagePath = box.read('profileImagePath');
+    _profileImagePath = box.read(_profileImagePathKey);
   }
 
   Future<void> pickProfileImage() async {
@@ -47,7 +54,7 @@ class ProfileProvider extends ChangeNotifier {
 
         final File savedImage = File(image.path).copySync(savePath);
         _profileImagePath = savedImage.path;
-        box.write('profileImagePath', _profileImagePath);
+        box.write(_profileImagePathKey, _profileImagePath);
 
         notifyListeners();
         Get.snackbar('Success', 'Profile picture updated successfully');
@@ -58,13 +65,12 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   void clearProfileData() {
-    box.remove('profileImagePath');
+    _profileImagePath = null;
+    box.remove(_profileImagePathKey);
     notifyListeners();
   }
 
-  // FIXED: Address management methods
   void storeAddress() {
-    // Validate the form first
     if (!addressFormKey.currentState!.validate()) {
       return;
     }
@@ -77,6 +83,9 @@ class ProfileProvider extends ChangeNotifier {
     box.write(STATE_KEY, stateController.text);
     box.write(POSTAL_CODE_KEY, postalCodeController.text);
     box.write(COUNTRY_KEY, countryController.text);
+    // Also save GPS coordinates if available
+    if (_latitude != null) box.write('LATITUDE_KEY', _latitude!);
+    if (_longitude != null) box.write('LONGITUDE_KEY', _longitude!);
 
     Get.snackbar('Success', 'Address stored successfully');
     notifyListeners();
@@ -89,6 +98,8 @@ class ProfileProvider extends ChangeNotifier {
     stateController.text = box.read(STATE_KEY) ?? '';
     postalCodeController.text = box.read(POSTAL_CODE_KEY) ?? '';
     countryController.text = box.read(COUNTRY_KEY) ?? '';
+    _latitude = box.read('LATITUDE_KEY');
+    _longitude = box.read('LONGITUDE_KEY');
   }
 
   void clearAddress() {
@@ -105,7 +116,31 @@ class ProfileProvider extends ChangeNotifier {
     box.remove(STATE_KEY);
     box.remove(POSTAL_CODE_KEY);
     box.remove(COUNTRY_KEY);
+    box.remove('LATITUDE_KEY');
+    box.remove('LONGITUDE_KEY');
+    _latitude = null;
+    _longitude = null;
 
+    notifyListeners();
+  }
+
+  // Set GPS coordinates from map picker
+  void setCoordinates(double? lat, double? lng) {
+    _latitude = lat;
+    _longitude = lng;
+    notifyListeners();
+  }
+
+  // Synchronize address from CartProvider
+  void syncFromCartProvider(phone, street, city, state, postalCode, country, {lat, lng}) {
+    phoneController.text = phone ?? '';
+    streetController.text = street ?? '';
+    cityController.text = city ?? '';
+    stateController.text = state ?? '';
+    postalCodeController.text = postalCode ?? '';
+    countryController.text = country ?? '';
+    _latitude = lat;
+    _longitude = lng;
     notifyListeners();
   }
 }

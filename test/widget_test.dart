@@ -1,29 +1,64 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+import 'dart:io';
 
+import 'package:e_commerce_flutter/core/data/data_provider.dart';
 import 'package:e_commerce_flutter/main.dart';
-import 'package:flutter/material.dart';
+import 'package:e_commerce_flutter/screen/login_screen/login_screen.dart';
+import 'package:e_commerce_flutter/screen/login_screen/provider/user_provider.dart';
+import 'package:e_commerce_flutter/screen/profile_screen/provider/profile_provider.dart';
+import 'package:e_commerce_flutter/screen/product_by_category_screen/provider/product_by_category_provider.dart';
+import 'package:e_commerce_flutter/screen/product_cart_screen/provider/cart_provider.dart';
+import 'package:e_commerce_flutter/screen/product_details_screen/provider/product_detail_provider.dart';
+import 'package:e_commerce_flutter/screen/product_details_screen/provider/rating_provider.dart';
+import 'package:e_commerce_flutter/screen/product_favorite_screen/provider/favorite_provider.dart';
+import 'package:e_commerce_flutter/screen/product_list_screen/provider/product_list_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  setUpAll(() async {
+    const pathProviderChannel = MethodChannel(
+      'plugins.flutter.io/path_provider',
+    );
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(pathProviderChannel, (methodCall) async {
+      if (methodCall.method == 'getApplicationDocumentsDirectory') {
+        final storageDir = await Directory.systemTemp.createTemp(
+          'get_storage',
+        );
+        return storageDir.path;
+      }
+      return null;
+    });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await GetStorage.init();
+  });
+
+  testWidgets('app boots to the login screen when no user is stored',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => DataProvider()),
+          ChangeNotifierProvider(create: (_) => UserProvider()),
+          ChangeNotifierProvider(create: (_) => ProfileProvider()),
+          ChangeNotifierProvider(create: (_) => ProductListProvider()),
+          ChangeNotifierProvider(create: (_) => ProductByCategoryProvider()),
+          ChangeNotifierProvider(create: (_) => ProductDetailProvider()),
+          ChangeNotifierProvider(create: (_) => CartProvider()),
+          ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+          ChangeNotifierProvider(create: (_) => RatingProvider()),
+        ],
+        child: const MyApp(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LoginScreen), findsOneWidget);
   });
 }

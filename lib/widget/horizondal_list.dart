@@ -17,6 +17,8 @@ class HorizontalList<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return SizedBox(
       height: 60,
       child: ListView.builder(
@@ -32,7 +34,9 @@ class HorizontalList<T> extends StatelessWidget {
               label: Text(
                 itemToString(item),
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black,
+                  color: isSelected
+                      ? Colors.white
+                      : Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               selected: isSelected,
@@ -41,13 +45,16 @@ class HorizontalList<T> extends StatelessWidget {
                   onSelect(item);
                 }
               },
-              backgroundColor: Colors.white,
+              backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
               selectedColor: AppColor.darkOrange,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
                 side: BorderSide(
-                  color:
-                      isSelected ? AppColor.darkOrange : Colors.grey.shade300,
+                  color: isSelected
+                      ? AppColor.darkOrange
+                      : isDarkMode
+                          ? Colors.grey[700]!
+                          : Colors.grey.shade300,
                   width: 1,
                 ),
               ),

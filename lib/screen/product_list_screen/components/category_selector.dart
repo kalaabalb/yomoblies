@@ -13,6 +13,8 @@ class CategorySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return SizedBox(
       height: 60,
       child: ListView.builder(
@@ -32,9 +34,15 @@ class CategorySelector extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
                   color: category.isSelected
-                      ? const Color(0xFFf16b26)
-                      : const Color(0xFFE5E6E8),
+                      ? colorScheme.primary
+                      : colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: category.isSelected
+                        ? colorScheme.primary
+                        : colorScheme.outline.withOpacity(0.3),
+                    width: category.isSelected ? 2 : 1,
+                  ),
                 ),
                 alignment: Alignment.center,
                 child: Column(
@@ -47,7 +55,10 @@ class CategorySelector extends StatelessWidget {
                         height: 90,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.error, color: Colors.grey);
+                          return Icon(
+                            Icons.error,
+                            color: colorScheme.onSurfaceVariant,
+                          );
                         },
                       ),
                     ),
@@ -55,11 +66,13 @@ class CategorySelector extends StatelessWidget {
                     Text(
                       category.name ?? '',
                       style: TextStyle(
-                        color:
-                            category.isSelected ? Colors.white : Colors.black,
+                        color: category.isSelected
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurface,
                         fontSize: 12,
                       ),
                       overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ],
                 ),

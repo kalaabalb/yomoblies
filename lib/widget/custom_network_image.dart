@@ -27,34 +27,30 @@ class CustomNetworkImage extends StatelessWidget {
       return _buildPlaceholder();
     }
 
-    // Fix HTTP/HTTPS issues for local development
-    String fixedUrl = _fixImageUrl(imageUrl);
-
-    print('🟡 Loading image: $fixedUrl');
+    final fixedUrl = _fixImageUrl(imageUrl);
 
     return CachedNetworkImage(
       imageUrl: fixedUrl,
       fit: fit,
+      scale: scale,
       width: width,
       height: height,
       placeholder: (context, url) => _buildLoadingShimmer(),
       errorWidget: (context, url, error) {
-        print('🔴 Image load error: $error');
-        print('🔴 Image URL: $fixedUrl');
+        debugPrint('Image load error: $error');
+        debugPrint('Image URL: $fixedUrl');
         return _buildErrorPlaceholder();
       },
     );
   }
 
   String _fixImageUrl(String url) {
-    // Fix localhost and IP addresses for development
     if (url.contains('localhost')) {
       return url.replaceAll('localhost:3000', '10.161.175.199:3000');
     }
     if (url.contains('10.161.170.81')) {
       return url.replaceAll('10.161.170.81:3000', '10.161.175.199:3000');
     }
-    // Ensure HTTP for local development
     if (url.contains('10.161.') && url.contains('https://')) {
       return url.replaceAll('https://', 'http://');
     }
@@ -116,7 +112,10 @@ class CustomNetworkImage extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'No Image',
-            style: TextStyle(fontSize: _getTextSize(), color: Colors.grey[500]),
+            style: TextStyle(
+              fontSize: _getTextSize(),
+              color: Colors.grey[500],
+            ),
           ),
         ],
       ),

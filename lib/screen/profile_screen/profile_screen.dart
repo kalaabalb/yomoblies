@@ -14,7 +14,6 @@ import '../../utility/app_color.dart';
 import '../my_order_screen/my_order_screen.dart';
 import '../../widget/custom_text_field.dart';
 import 'package:provider/provider.dart';
-import '../../shared/widgets/buttons.dart';
 import '../../shared/widgets/cards.dart';
 
 class ProfileScreen extends StatefulWidget {

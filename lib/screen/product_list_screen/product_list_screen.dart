@@ -20,20 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:e_commerce_flutter/core/data/data_provider.dart';
-import 'package:e_commerce_flutter/screen/product_list_screen/components/category_selector.dart';
-import 'package:e_commerce_flutter/screen/product_list_screen/components/custom_app_bar.dart';
-import 'package:e_commerce_flutter/screen/product_list_screen/components/poster_section.dart';
-import 'package:e_commerce_flutter/screen/product_list_screen/provider/product_list_provider.dart';
-import 'package:e_commerce_flutter/screen/profile_screen/provider/profile_provider.dart';
-import 'package:e_commerce_flutter/utility/app_color.dart';
-import 'package:e_commerce_flutter/widget/product_grid_view.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-// Change ProductListScreen to StatefulWidget
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
 
@@ -61,13 +48,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
           final dataProvider = context.read<DataProvider>();
           final productListProvider = context.read<ProductListProvider>();
 
-          // Load essential data first
           await dataProvider.refreshAllData();
 
-          // Update product list with loaded data
           productListProvider.updateProducts(dataProvider.allProducts);
         } catch (e) {
-          print('Error in initial data load: $e');
+          debugPrint('Error in initial data load: $e');
         }
       });
     }
@@ -88,7 +73,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
       body: SafeArea(
         child: Consumer<DataProvider>(
           builder: (context, dataProvider, child) {
-            // Show loading skeleton while data is loading
             if (dataProvider.isLoading && dataProvider.allProducts.isEmpty) {
               return _buildLoadingSkeleton();
             }
@@ -139,7 +123,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Welcome section
             Text(
               "$welcomeText $userName",
               style: Theme.of(context).textTheme.displayLarge,
@@ -153,14 +136,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Posters section with loading state
             dataProvider.isPostersLoading && dataProvider.posters.isEmpty
                 ? _buildPostersLoadingSkeleton()
                 : const PosterSection(),
 
             const SizedBox(height: 20),
 
-            // Categories section
             Text(
               dataProvider.safeTranslate(
                 'top_categories',
@@ -170,7 +151,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ),
             const SizedBox(height: 10),
 
-            // Categories with loading state
             dataProvider.isCategoriesLoading && dataProvider.categories.isEmpty
                 ? _buildCategoriesLoadingSkeleton()
                 : Consumer<DataProvider>(
@@ -189,13 +169,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ),
             const SizedBox(height: 10),
 
-            // Products with loading state
             dataProvider.isProductsLoading && dataProvider.allProducts.isEmpty
                 ? _buildProductsLoadingSkeleton()
                 : Consumer2<DataProvider, ProductListProvider>(
                     builder:
                         (context, dataProvider, productListProvider, child) {
-                      // Always ensure product list is updated with current data
                       if (productListProvider.filteredProducts.isEmpty &&
                           dataProvider.allProducts.isNotEmpty) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -228,10 +206,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 50),
       child: Center(
-        // Wrap with Center widget
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center, // Add this
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
               Icons.search_off,
@@ -246,7 +223,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 fontWeight: FontWeight.bold,
                 color: Colors.grey.shade600,
               ),
-              textAlign: TextAlign.center, // Add this
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
             Text(
@@ -254,7 +231,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
               style: TextStyle(
                 color: Colors.grey.shade500,
               ),
-              textAlign: TextAlign.center, // Add this
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
@@ -273,30 +250,25 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  // YouTube-like loading skeleton for main content
   Widget _buildLoadingSkeleton() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Welcome skeleton
           _buildShimmerLoader(width: 200, height: 28),
           const SizedBox(height: 8),
           _buildShimmerLoader(width: 150, height: 20),
           const SizedBox(height: 20),
 
-          // Posters skeleton
           _buildPostersLoadingSkeleton(),
           const SizedBox(height: 20),
 
-          // Categories skeleton
           _buildShimmerLoader(width: 120, height: 24),
           const SizedBox(height: 10),
           _buildCategoriesLoadingSkeleton(),
           const SizedBox(height: 20),
 
-          // Products skeleton
           _buildShimmerLoader(width: 80, height: 24),
           const SizedBox(height: 10),
           _buildProductsLoadingSkeleton(),
@@ -320,7 +292,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  // Loading skeleton for posters
   Widget _buildPostersLoadingSkeleton() {
     return SizedBox(
       height: 170,
@@ -346,7 +317,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  // Loading skeleton for categories
   Widget _buildCategoriesLoadingSkeleton() {
     return SizedBox(
       height: 100,
@@ -391,7 +361,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  // Loading skeleton for products
   Widget _buildProductsLoadingSkeleton() {
     return GridView.builder(
       itemCount: 6,
@@ -415,14 +384,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Image placeholder
                 Container(
                   height: 120,
                   width: double.infinity,
                   color: Colors.white,
                 ),
                 const SizedBox(height: 8),
-                // Title placeholder
                 Container(
                   height: 16,
                   width: double.infinity,
@@ -430,7 +397,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   color: Colors.white,
                 ),
                 const SizedBox(height: 4),
-                // Price placeholder
                 Container(
                   height: 14,
                   width: 80,
@@ -438,7 +404,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   color: Colors.white,
                 ),
                 const SizedBox(height: 4),
-                // Stock placeholder
                 Container(
                   height: 12,
                   width: 60,
@@ -730,13 +695,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
   void _changeLanguage(BuildContext context, String languageCode) {
     final dataProvider = context.read<DataProvider>();
 
-    // Change language
     dataProvider.changeLanguage(languageCode);
 
-    // Close dialog
     Navigator.pop(context);
 
-    // Force rebuild of the entire app by going back to HomeScreen
     if (context.mounted) {
       Navigator.pushAndRemoveUntil(
         context,

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:e_commerce_flutter/screen/home_screen.dart';
 import 'package:e_commerce_flutter/screen/profile_screen/provider/profile_provider.dart';
 import 'package:e_commerce_flutter/utility/snack_bar_helper.dart';
@@ -7,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cart/cart.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import '../../../models/api_response.dart';
 import '../../../models/user.dart';
 import '../../../services/http_services.dart';
 import '../login_screen.dart';
@@ -80,12 +78,11 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> registerUser(
-      String name, String dummyEmail, String password) async {
+  Future<void> registerUser(String name, String email, String password) async {
     try {
       Map<String, dynamic> user = {
         "name": name.toLowerCase().trim(),
-        "email": dummyEmail.toLowerCase(),
+        "email": email.toLowerCase().trim(),
         "password": password,
       };
 
@@ -112,6 +109,75 @@ class UserProvider extends ChangeNotifier {
         } else {
           throw Exception('Registration failed: ${response.statusText}');
         }
+      }
+    } catch (e) {
+      SnackBarHelper.showErrorSnackBar(e.toString());
+      rethrow;
+    }
+  }
+
+  // Forgot password - send reset code to email
+  Future<void> forgotPassword(String email) async {
+    try {
+      Map<String, dynamic> data = {
+        'email': email.toLowerCase().trim(),
+      };
+
+      final response = await service.addItem(
+        endpointUrl: 'verification/forgot-password',
+        itemData: data,
+      );
+
+      if (response.isOk) {
+        final responseBody = response.body as Map<String, dynamic>;
+        final success = responseBody['success'] ?? false;
+        final message = responseBody['message'] ?? 'Reset code sent';
+
+        if (success) {
+          SnackBarHelper.showSuccessSnackBar(message);
+        } else {
+          throw Exception(message);
+        }
+      } else {
+        if (response.statusCode == 404) {
+          throw Exception('No verified account found with this email.');
+        } else {
+          throw Exception('Failed to send reset code: ${response.statusText}');
+        }
+      }
+    } catch (e) {
+      SnackBarHelper.showErrorSnackBar(e.toString());
+      rethrow;
+    }
+  }
+
+  // Reset password with code
+  Future<void> resetPassword(
+      String email, String code, String newPassword) async {
+    try {
+      Map<String, dynamic> data = {
+        'email': email.toLowerCase().trim(),
+        'code': code.trim(),
+        'newPassword': newPassword,
+      };
+
+      final response = await service.addItem(
+        endpointUrl: 'verification/reset-password',
+        itemData: data,
+      );
+
+      if (response.isOk) {
+        final responseBody = response.body as Map<String, dynamic>;
+        final success = responseBody['success'] ?? false;
+        final message = responseBody['message'] ?? 'Password reset successful';
+
+        if (success) {
+          SnackBarHelper.showSuccessSnackBar(message);
+        } else {
+          throw Exception(message);
+        }
+      } else {
+        throw Exception('Failed to reset password: ${response.statusText}');
       }
     } catch (e) {
       SnackBarHelper.showErrorSnackBar(e.toString());
