@@ -987,6 +987,8 @@ class DataProvider extends ChangeNotifier {
       // Only reload orders (which are user-specific)
       await getAllOrders();
     } catch (e) {
+      // Keep the currently loaded data visible if a refresh fails.
+      return;
     } finally {
       _isLoading = false;
       notifyListeners();

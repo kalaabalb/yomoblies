@@ -29,6 +29,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
       await dataProvider.refreshAllData();
       favoriteProvider.loadFavoriteItems(dataProvider.allProducts);
 
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Favorites refreshed'),
@@ -36,6 +38,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to refresh favorites: $e'),
@@ -43,7 +46,9 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         ),
       );
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

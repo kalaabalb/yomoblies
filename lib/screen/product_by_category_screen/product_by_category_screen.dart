@@ -71,14 +71,11 @@ class ProductByCategoryScreen extends StatelessWidget {
                                     selected:
                                         proByCatProvider.mySelectedSubCategory,
                                     onSelect: (val) {
-                                      if (val != null) {
-                                        proByCatProvider
-                                            .filterProductBySubCategory(
-                                          val,
-                                          dataProvider.allProducts,
-                                          dataProvider.brands,
-                                        );
-                                      }
+                                      proByCatProvider.filterProductBySubCategory(
+                                        val,
+                                        dataProvider.allProducts,
+                                        dataProvider.brands,
+                                      );
                                     },
                                   ),
                                 );

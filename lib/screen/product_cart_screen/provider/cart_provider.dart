@@ -264,6 +264,8 @@ class CartProvider extends ChangeNotifier {
       notifyListeners();
 
       final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final profileProvider =
+          Provider.of<ProfileProvider>(context, listen: false);
       final user = userProvider.getLoginUsr();
 
       if (user == null) {
@@ -317,23 +319,25 @@ class CartProvider extends ChangeNotifier {
 
       if (response.isOk) {
         ApiResponse apiResponse = ApiResponse.fromJson(response.body, null);
-        if (apiResponse.success == true) {
-          SnackBarHelper.showSuccessSnackBar('Order created successfully!');
-          saveAddress();
-          // Synchronize address with ProfileProvider
-          _syncAddressWithProfileProvider(context);
-          clearCartItems();
-          _paymentProofImage = null;
-          _paymentProofUrl = null;
+          if (apiResponse.success == true) {
+            SnackBarHelper.showSuccessSnackBar('Order created successfully!');
+            saveAddress();
+            // Synchronize address with ProfileProvider
+            _syncAddressWithProfileProvider(profileProvider);
+            clearCartItems();
+            _paymentProofImage = null;
+            _paymentProofUrl = null;
 
-          if (context.mounted) {
+            if (!context.mounted) {
+              return;
+            }
+
             Navigator.of(context).pop();
-          }
 
-          // Step C: Pass the cached finalAmount explicitly to the dialog
-          Future.delayed(const Duration(milliseconds: 500), () {
-            _showOrderConfirmation(context, finalAmount: finalAmount);
-          });
+            // Step C: Pass the cached finalAmount explicitly to the dialog
+            Future.delayed(const Duration(milliseconds: 500), () {
+              _showOrderConfirmation(finalAmount: finalAmount);
+            });
         } else {
           SnackBarHelper.showErrorSnackBar(
             'Failed to create order: ${apiResponse.message}',
@@ -355,9 +359,8 @@ class CartProvider extends ChangeNotifier {
   }
 
   // Synchronize address with ProfileProvider so both screens stay in sync
-  void _syncAddressWithProfileProvider(BuildContext context) {
+  void _syncAddressWithProfileProvider(ProfileProvider profileProvider) {
     try {
-      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
       profileProvider.phoneController.text = phoneController.text;
       profileProvider.streetController.text = streetController.text;
       profileProvider.cityController.text = cityController.text;
@@ -371,8 +374,7 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  void _showOrderConfirmation(BuildContext context,
-      {required double finalAmount}) {
+  void _showOrderConfirmation({required double finalAmount}) {
     Get.dialog(
       AlertDialog(
         title: const Text('🎉 Order Confirmed!'),
@@ -453,14 +455,17 @@ class CartProvider extends ChangeNotifier {
     if (selectedPaymentOption == 'cbe') {
       final result = await _showCBEPaymentInstructions(context);
       if (result == true) {
+        if (!context.mounted) return;
         await addOrder(context);
       }
     } else if (selectedPaymentOption == 'telebirr') {
       final result = await _showTelebirrPaymentInstructions(context);
       if (result == true) {
+        if (!context.mounted) return;
         await addOrder(context);
       }
     } else {
+      if (!context.mounted) return;
       await addOrder(context);
     }
   }
@@ -810,7 +815,9 @@ class CartProvider extends ChangeNotifier {
           countryController.text = savedAddress['country'] ?? '';
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      return;
+    }
   }
 
   void saveAddress() {
@@ -833,7 +840,9 @@ class CartProvider extends ChangeNotifier {
       box.write(STATE_KEY, stateController.text);
       box.write(POSTAL_CODE_KEY, postalCodeController.text);
       box.write(COUNTRY_KEY, countryController.text);
-    } catch (e) {}
+    } catch (e) {
+      return;
+    }
   }
 
   // New method to sync address from ProfileProvider (call when Profile updates)

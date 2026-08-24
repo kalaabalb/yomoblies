@@ -28,8 +28,7 @@ class ProductDetailScreen extends StatelessWidget {
               Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
         ),
         title: Text(
-          context.dataProvider.translate('product_details') ??
-              'Product Details',
+          context.dataProvider.translate('product_details'),
           style: TextStyle(
             color: Theme.of(context).textTheme.bodyLarge?.color,
             fontWeight: FontWeight.bold,

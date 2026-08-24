@@ -592,6 +592,7 @@ class _RatingSectionState extends State<RatingSection> {
   }
 
   void _deleteRating(BuildContext context, Rating rating) {
+    final navigator = Navigator.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -611,7 +612,7 @@ class _RatingSectionState extends State<RatingSection> {
                   )
                   .then((success) {
                 if (success && mounted) {
-                  Navigator.pop(context);
+                  navigator.pop();
                   // Refresh the rating data
                   _loadRatingData();
                 }

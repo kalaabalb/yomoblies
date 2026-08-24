@@ -343,10 +343,10 @@ class UserProvider extends ChangeNotifier {
 
   void logOutUser() {
     try {
-      try {
+      if (Get.isRegistered<ProfileProvider>()) {
         final profileProvider = Get.find<ProfileProvider>();
         profileProvider.clearProfileData();
-      } catch (e) {}
+      }
 
       clearAllUserData();
       Get.offAll(const LoginScreen());
@@ -379,7 +379,8 @@ class UserProvider extends ChangeNotifier {
         }
       }
     } catch (e) {
-      // Fall through to clear invalid sessions.
+      clearAllUserData();
+      return;
     }
 
     clearAllUserData();

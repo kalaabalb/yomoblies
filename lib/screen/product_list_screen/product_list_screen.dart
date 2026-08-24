@@ -80,10 +80,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
             return RefreshIndicator(
               onRefresh: () async {
                 try {
+                  final productListProvider =
+                      context.read<ProductListProvider>();
                   await dataProvider.refreshAllData();
-                  context.read<ProductListProvider>().refreshData(
-                        dataProvider.allProducts,
-                      );
+                  productListProvider.refreshData(dataProvider.allProducts);
+                  if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Data refreshed'),
@@ -91,6 +92,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     ),
                   );
                 } catch (e) {
+                  if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Refresh failed: $e'),
@@ -773,6 +775,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Could not launch URL'),
