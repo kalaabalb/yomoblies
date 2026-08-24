@@ -1,49 +1,54 @@
-# Yomoblies
+# YoMobiles Client
 
-![Flutter](https://img.shields.io/badge/Flutter-3.0%2B-02569B?logo=flutter&logoColor=white)
-![Dart](https://img.shields.io/badge/Dart-3.0%2B-0175C2?logo=dart&logoColor=white)
-![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Architecture](https://img.shields.io/badge/Architecture-Feature%20Oriented-6A5ACD)
+Flutter client application for the YoMobiles e-commerce platform.
 
-Flutter e-commerce frontend built with Provider, GetX, GetStorage, and a REST backend.
+This repository contains the customer-facing app used for browsing the catalog, managing a cart and favorites, placing orders, reviewing products, and managing profile data.
 
-## Overview
+## Stack
 
-This repository contains the Flutter client for an e-commerce application. The codebase includes authentication, catalog browsing, product details, ratings, cart and favorites, profile management, order creation, and order tracking.
-
-The app is structured as a feature-oriented Flutter project and is ready to run on the standard Flutter platforms supported by the generated runners in this repository.
+- Flutter
+- Provider for state management
+- GetX for navigation and lightweight app services
+- GetStorage for local session and preference storage
+- REST API integration through a shared HTTP service
+- `flutter_cart` for cart persistence
+- `cached_network_image` for remote media
 
 ## Features
 
-- Authentication flow
+- User registration and login
+- Session restore from stored JWT access token
 - Product catalog browsing
 - Category, brand, and sub-category browsing
-- Product details with customer ratings
+- Product details and ratings
 - Favorites
 - Cart management
-- Order creation
-- Order tracking
+- Order creation and order history
 - Profile editing
 - Address storage
-- Light and dark theme support
-- Multi-language UI strings
-- In-app tracking screen using a web view
+- Payment proof upload flow
+- Localized UI strings
 
 ## Screenshots
 
-No production screenshots are committed in this repository snapshot.
+Production screenshots are organized under [`docs/screenshots/`](docs/screenshots/README.md):
 
-Add captures in [`docs/screenshots/`](docs/screenshots/README.md) with these filenames:
+- `docs/screenshots/authentication/login.jpg`
+- `docs/screenshots/core/home.jpg`
+- `docs/screenshots/shopping/product_details.jpg`
+- `docs/screenshots/shopping/cart.jpg`
+- `docs/screenshots/account/profile.jpg`
+- `docs/screenshots/orders/order_details.jpg`
 
-| Screen | Suggested file |
-| --- | --- |
-| Home | `docs/screenshots/home.png` |
-| Product details | `docs/screenshots/product-details.png` |
-| Cart | `docs/screenshots/cart.png` |
-| Profile | `docs/screenshots/profile.png` |
+Additional screenshots are grouped by feature folder:
 
-If you add screenshots later, keep them consistent in size and device framing.
+- `authentication/`
+- `core/`
+- `shopping/`
+- `orders/`
+- `account/`
+
+Keep future screenshots consistent in device size and crop.
 
 ## Installation
 
@@ -51,90 +56,85 @@ If you add screenshots later, keep them consistent in size and device framing.
 
 - Flutter SDK 3.0 or newer
 - Dart 3
-- A device or emulator
+- A connected device, emulator, or desktop target
 
 ### Setup
 
 ```bash
 git clone <repo-url>
-cd yomoblies
+cd yomoblies_client
 flutter pub get
 ```
 
-### Configuration
-
-- Backend base URL is defined in [`lib/utility/constants.dart`](lib/utility/constants.dart)
-- OneSignal initialization is still configured in [`lib/main.dart`](lib/main.dart)
-- Review [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) before shipping to production
-
 ### Run
 
-```bash
-flutter run
-```
+By default the app uses the hosted backend URL declared in [`lib/utility/constants.dart`](lib/utility/constants.dart).
 
-### Verify
+For local development against a running backend, override the API base URL at launch:
 
 ```bash
-dart format --set-exit-if-changed .
-flutter analyze
-flutter test
+flutter run --dart-define=MAIN_URL=http://127.0.0.1:3000
 ```
+
+## Configuration
+
+- API base URL is provided through the `MAIN_URL` compile-time define.
+- User sessions are stored in `GetStorage` as `auth_token` and `USER_INFO_BOX`.
+- Stored sessions are validated on startup by calling `/users/profile`.
+- Invalid or expired sessions are cleared automatically.
+- OneSignal initialization remains in `lib/main.dart` and should be configured before shipping.
 
 ## Architecture
 
-The application follows a feature-oriented layout:
+The client follows a feature-oriented Flutter structure:
 
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) explains the app layers and data flow
-- [`docs/FOLDER_STRUCTURE.md`](docs/FOLDER_STRUCTURE.md) documents the repository folders
-- [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) documents the HTTP endpoints used by the app
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- [`docs/FOLDER_STRUCTURE.md`](docs/FOLDER_STRUCTURE.md)
+- [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md)
 
-In short:
+High-level responsibilities:
 
-- `lib/core/data/` owns translation strings and app-wide data loading
-- `lib/models/` contains JSON-backed model classes
+- `lib/core/data/` owns translations and app-wide data loading
+- `lib/models/` contains JSON-backed data models
 - `lib/services/` contains the shared HTTP layer
-- `lib/screen/` contains feature screens and their providers
-- `lib/shared/widgets/`, `lib/widget/`, and `lib/utility/` hold reusable UI and helpers
-
-## API Documentation
-
-The app talks to a REST backend using a shared `HttpService`.
-
-- Base URL: `https://yonasmarketplace-backend.onrender.com`
-- Common response shape: `success`, `message`, and `data`
-- Endpoint reference: [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md)
+- `lib/screen/` contains feature screens and providers
+- `lib/shared/widgets/`, `lib/widget/`, and `lib/utility/` contain reusable UI and helpers
 
 ## Backend Repository
 
-The backend source repository is not included in this checkout.
+The backend lives in the sibling repository [`../yomobiles_backend`](../yomobiles_backend).
 
-If you maintain the backend separately, link it here once it is confirmed and public.
+It is responsible for auth, data validation, order storage, ratings, and payment verification.
 
-## Repository Topics
+## API Documentation
 
-Suggested GitHub topics:
-
-`flutter`, `dart`, `ecommerce`, `provider`, `getx`, `mobile`, `rest-api`, `cross-platform`, `opensource`, `state-management`
-
-## Release Notes
-
-- Current notes: [`CHANGELOG.md`](CHANGELOG.md)
-- Release process: [`docs/RELEASE.md`](docs/RELEASE.md)
-- Public release notes summary: [`docs/RELEASE_NOTES.md`](docs/RELEASE_NOTES.md)
+See [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) for the current client-side API contract, including auth-protected user routes and order history endpoints.
 
 ## Testing
 
-The repository includes a smoke test that verifies app boot. Feature-level tests are still limited.
+```bash
+flutter test
+flutter analyze
+```
+
+The project currently includes smoke coverage for app startup.
+
+## Release Notes
+
+- [`CHANGELOG.md`](CHANGELOG.md)
+- [`docs/RELEASE.md`](docs/RELEASE.md)
+- [`docs/RELEASE_NOTES.md`](docs/RELEASE_NOTES.md)
 
 ## Contributing
 
 - [`CONTRIBUTING.md`](CONTRIBUTING.md)
-- Issue templates and pull request templates are configured in `.github/`
+- Issue and pull request templates are configured under [`.github/`](.github/)
 
 ## Security
 
 - [`SECURITY.md`](SECURITY.md)
+
+Do not commit API keys, tokens, or private backend credentials.
 
 ## License
 
