@@ -199,7 +199,7 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateProfile({
+  Future<bool> updateProfile({
     required String userId,
     required String name,
     required String currentPassword,
@@ -210,12 +210,12 @@ class UserProvider extends ChangeNotifier {
     try {
       if (name.isEmpty) {
         SnackBarHelper.showProfileError('Username cannot be empty');
-        return;
+        return false;
       }
 
       if (currentPassword.isEmpty) {
         SnackBarHelper.showProfileError('Current password is required');
-        return;
+        return false;
       }
 
       if (Get.isDialogOpen == false) {
@@ -238,7 +238,7 @@ class UserProvider extends ChangeNotifier {
           _closeLoadingDialog(isLoadingDialogShown);
           SnackBarHelper.showProfileError(
               'New password must be at least 4 characters');
-          return;
+          return false;
         }
         updateData['password'] = newPassword;
       }
@@ -282,18 +282,26 @@ class UserProvider extends ChangeNotifier {
                 logOutUser();
               });
             }
+
+            return true;
           }
+
+          SnackBarHelper.showProfileError('Profile update returned no data');
+          return false;
         } else {
           SnackBarHelper.showProfileError(message);
+          return false;
         }
       } else {
         SnackBarHelper.showProfileError(
             'Update failed: ${response.statusText}');
+        return false;
       }
     } catch (e) {
       _closeLoadingDialog(isLoadingDialogShown);
       debugPrint('❌ Profile update error: $e');
       SnackBarHelper.showProfileError('An error occurred');
+      return false;
     }
   }
 
@@ -369,6 +377,11 @@ class UserProvider extends ChangeNotifier {
 
     try {
       final response = await service.getItems(endpointUrl: 'users/profile');
+      if (response.statusCode == 401) {
+        clearAllUserData();
+        return;
+      }
+
       if (response.isOk) {
         final responseBody = response.body as Map<String, dynamic>;
         final data = responseBody['data'];
@@ -379,10 +392,7 @@ class UserProvider extends ChangeNotifier {
         }
       }
     } catch (e) {
-      clearAllUserData();
       return;
     }
-
-    clearAllUserData();
   }
 }

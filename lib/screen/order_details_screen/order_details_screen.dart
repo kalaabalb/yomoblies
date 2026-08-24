@@ -257,8 +257,9 @@ class OrderDetailsScreen extends StatelessWidget {
   }
 
   String _formatStatus(String? status) {
-    if (status == null) return 'Unknown';
-    return status[0].toUpperCase() + status.substring(1);
+    final trimmed = status?.trim();
+    if (trimmed == null || trimmed.isEmpty) return 'Unknown';
+    return trimmed.substring(0, 1).toUpperCase() + trimmed.substring(1);
   }
 
   String _formatDate(String? dateString) {

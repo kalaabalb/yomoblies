@@ -98,36 +98,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final user = context.userProvider.getLoginUsr();
       if (user == null) {
         SnackBarHelper.showErrorSnackBar('User not found');
-        setState(() {
-          _isLoading = false;
-        });
         return;
       }
 
-      await context.userProvider.updateProfile(
+      final updated = await context.userProvider.updateProfile(
         userId: user.sId!,
         name: _nameController.text,
         currentPassword: _currentPasswordController.text,
         newPassword: _isChangingPassword ? _newPasswordController.text : null,
       );
 
+      if (!mounted || !updated) {
+        return;
+      }
+
       setState(() {
         _isEditing = false;
-        _isLoading = false;
         _isChangingPassword = false;
-
         _currentPasswordController.clear();
         _newPasswordController.clear();
         _confirmPasswordController.clear();
       });
 
-      SnackBarHelper.showSuccessSnackBar('Profile updated successfully!');
-
       _loadUserData();
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      if (!mounted) return;
+      SnackBarHelper.showErrorSnackBar('An error occurred');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

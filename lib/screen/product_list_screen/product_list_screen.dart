@@ -32,6 +32,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
   bool _isInitialLoad = true;
   final ScrollController _scrollController = ScrollController();
 
+  String _initialFromName(String? value, {String fallback = 'U'}) {
+    final trimmed = value?.trim();
+    if (trimmed == null || trimmed.isEmpty) {
+      return fallback;
+    }
+    return trimmed.substring(0, 1).toUpperCase();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -446,16 +454,20 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               as ImageProvider,
                       child: profileProvider.profileImagePath == null
                           ? Text(
-                              context
-                                      .read<UserProvider>()
-                                      .getLoginUsr()
-                                      ?.name
-                                      ?.substring(0, 1)
-                                      .toUpperCase() ??
+                              _initialFromName(
+                                context
+                                    .read<UserProvider>()
+                                    .getLoginUsr()
+                                    ?.name,
+                                fallback: _initialFromName(
                                   context
                                       .read<DataProvider>()
-                                      .safeTranslate('user', fallback: 'U')
-                                      .substring(0, 1),
+                                      .safeTranslate(
+                                        'user',
+                                        fallback: 'U',
+                                      ),
+                                ),
+                              ),
                               style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
