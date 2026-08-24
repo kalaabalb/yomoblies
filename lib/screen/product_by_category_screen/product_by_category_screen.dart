@@ -11,24 +11,40 @@ import 'package:provider/provider.dart';
 import '../../widget/horizondal_list.dart';
 import '../../widget/product_grid_view.dart';
 
-class ProductByCategoryScreen extends StatelessWidget {
+class ProductByCategoryScreen extends StatefulWidget {
   final Category selectedCategory;
 
   const ProductByCategoryScreen({super.key, required this.selectedCategory});
 
   @override
-  Widget build(BuildContext context) {
-    final proByCProvider = context.proByCProvider;
-    final dataProvider = context.dataProvider;
+  State<ProductByCategoryScreen> createState() =>
+      _ProductByCategoryScreenState();
+}
 
-    Future.delayed(Duration.zero, () {
+class _ProductByCategoryScreenState extends State<ProductByCategoryScreen> {
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _initialized) return;
+      _initialized = true;
+      final proByCProvider = context.proByCProvider;
+      final dataProvider = context.dataProvider;
       proByCProvider.filterInitialProductAndSubCategory(
-        selectedCategory,
+        widget.selectedCategory,
         dataProvider.allProducts,
         dataProvider.subCategories,
         dataProvider.brands,
       );
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final proByCProvider = context.proByCProvider;
+    final dataProvider = context.dataProvider;
 
     return Scaffold(
       body: SafeArea(
@@ -38,7 +54,7 @@ class ProductByCategoryScreen extends StatelessWidget {
               floating: true,
               snap: true,
               title: Text(
-                "${selectedCategory.name}",
+                "${widget.selectedCategory.name}",
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

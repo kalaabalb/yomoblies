@@ -21,13 +21,15 @@ class _MyOrderScreenState extends State<MyOrderScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       _loadOrders();
       _debugAllOrders();
     });
   }
 
-  void _loadOrders() async {
+  Future<void> _loadOrders() async {
     await context.dataProvider.getAllOrders();
+    if (!mounted) return;
     _debugOrders();
   }
 
@@ -84,6 +86,7 @@ class _MyOrderScreenState extends State<MyOrderScreen> {
           return RefreshIndicator(
             onRefresh: () async {
               await context.dataProvider.getAllOrders();
+              if (!mounted) return;
               _debugOrders(); // Debug after refresh
             },
             child: ListView.builder(
@@ -118,7 +121,7 @@ class _MyOrderScreenState extends State<MyOrderScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Order #${order.sId?.substring(order.sId!.length - 6).toUpperCase() ?? 'N/A'}',
+                'Order #${_shortOrderId(order.sId)}',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -355,5 +358,12 @@ class _MyOrderScreenState extends State<MyOrderScreen> {
     } catch (e) {
       return dateString;
     }
+  }
+
+  String _shortOrderId(String? orderId) {
+    if (orderId == null || orderId.isEmpty) return 'N/A';
+    return orderId.length > 6
+        ? orderId.substring(orderId.length - 6).toUpperCase()
+        : orderId.toUpperCase();
   }
 }

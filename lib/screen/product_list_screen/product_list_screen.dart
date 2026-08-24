@@ -42,8 +42,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
     if (_isInitialLoad) {
       _isInitialLoad = false;
       await Future.delayed(const Duration(milliseconds: 300));
+      if (!mounted) return;
 
       WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
         try {
           final dataProvider = context.read<DataProvider>();
           final productListProvider = context.read<ProductListProvider>();
@@ -179,6 +181,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                       if (productListProvider.filteredProducts.isEmpty &&
                           dataProvider.allProducts.isNotEmpty) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (!context.mounted) return;
                           productListProvider
                               .updateProducts(dataProvider.allProducts);
                         });

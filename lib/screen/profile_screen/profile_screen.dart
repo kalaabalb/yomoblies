@@ -54,6 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _pickImage() async {
     await context.profileProvider.pickProfileImage();
+    if (!mounted) return;
     setState(() {
       _profileImage = context.profileProvider.profileImagePath != null
           ? File(context.profileProvider.profileImagePath!)

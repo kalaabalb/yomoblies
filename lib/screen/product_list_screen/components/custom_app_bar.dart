@@ -57,6 +57,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                           productListProvider.searchQuery &&
                       !_searchFocusNode.hasFocus) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!mounted) return;
                       _searchController.text = productListProvider.searchQuery;
                     });
                   }

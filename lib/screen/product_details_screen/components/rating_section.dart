@@ -24,6 +24,7 @@ class _RatingSectionState extends State<RatingSection> {
     super.initState();
     // Load rating data when the section is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       _loadRatingData();
     });
   }

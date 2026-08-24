@@ -38,9 +38,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _isInitialLoad = false;
       // Give a small delay to ensure context is available
       await Future.delayed(const Duration(milliseconds: 100));
+      if (!mounted) return;
 
       // Load data in the background
       WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
         final dataProvider = context.read<DataProvider>();
         await dataProvider.refreshAllData();
       });
