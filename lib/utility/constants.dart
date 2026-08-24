@@ -1,16 +1,16 @@
 // Update this line:
-const String MAIN_URL = String.fromEnvironment(
+const String mainUrl = String.fromEnvironment(
   'MAIN_URL',
   defaultValue: 'https://yonasmarketplace-backend.onrender.com',
 );
 
 // Keep all your other constants:
-const FAVORITE_PRODUCT_BOX = 'FAVORITE_PRODUCT_BOX';
-const USER_INFO_BOX = 'USER_INFO_BOX';
+const favoriteProductBox = 'FAVORITE_PRODUCT_BOX';
+const userInfoBox = 'USER_INFO_BOX';
 
-const PHONE_KEY = 'PHONE_KEY';
-const STREET_KEY = 'STREET_KEY';
-const CITY_KEY = 'CITY_KEY';
-const STATE_KEY = 'STATE_KEY';
-const POSTAL_CODE_KEY = 'POSTAL_CODE_KEY';
-const COUNTRY_KEY = 'COUNTRY_KEY';
+const phoneKey = 'PHONE_KEY';
+const streetKey = 'STREET_KEY';
+const cityKey = 'CITY_KEY';
+const stateKey = 'STATE_KEY';
+const postalCodeKey = 'POSTAL_CODE_KEY';
+const countryKey = 'COUNTRY_KEY';

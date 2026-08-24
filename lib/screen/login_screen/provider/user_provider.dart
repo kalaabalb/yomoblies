@@ -23,7 +23,7 @@ class UserProvider extends ChangeNotifier {
       return null;
     }
 
-    Map<String, dynamic>? userJson = box.read(USER_INFO_BOX);
+    Map<String, dynamic>? userJson = box.read(userInfoBox);
 
     if (userJson == null || userJson.isEmpty) {
       return null;
@@ -306,7 +306,7 @@ class UserProvider extends ChangeNotifier {
   Future<void> saveLoginInfo(User? loginUser, {String? token}) async {
     if (loginUser == null) return;
     try {
-      await box.write(USER_INFO_BOX, loginUser.toJson());
+      await box.write(userInfoBox, loginUser.toJson());
       if (token != null && token.isNotEmpty) {
         await box.write('auth_token', token);
       }
@@ -319,19 +319,19 @@ class UserProvider extends ChangeNotifier {
   void clearAllUserData() {
     try {
       box.remove('auth_token');
-      box.remove(USER_INFO_BOX);
+      box.remove(userInfoBox);
 
-      box.remove(FAVORITE_PRODUCT_BOX);
+      box.remove(favoriteProductBox);
 
       var flutterCart = FlutterCart();
       flutterCart.clearCart();
 
-      box.remove(PHONE_KEY);
-      box.remove(STREET_KEY);
-      box.remove(CITY_KEY);
-      box.remove(STATE_KEY);
-      box.remove(POSTAL_CODE_KEY);
-      box.remove(COUNTRY_KEY);
+      box.remove(phoneKey);
+      box.remove(streetKey);
+      box.remove(cityKey);
+      box.remove(stateKey);
+      box.remove(postalCodeKey);
+      box.remove(countryKey);
 
       box.remove('profileImagePath');
 
@@ -360,7 +360,7 @@ class UserProvider extends ChangeNotifier {
 
   Future<void> restoreSession() async {
     final token = box.read('auth_token');
-    final userJson = box.read(USER_INFO_BOX);
+    final userJson = box.read(userInfoBox);
 
     if (token == null || token.toString().isEmpty || userJson == null) {
       clearAllUserData();

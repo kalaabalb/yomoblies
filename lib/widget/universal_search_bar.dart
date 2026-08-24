@@ -79,8 +79,8 @@ class _UniversalSearchBarState extends State<UniversalSearchBar> {
             color: Theme.of(context).hintColor,
             fontSize: 16,
           ),
-          prefixIcon: Padding(
-            padding: const EdgeInsets.all(12.0),
+          prefixIcon: const Padding(
+            padding: EdgeInsets.all(12.0),
             child: Icon(
               Icons.search,
               color: AppColor.darkOrange,

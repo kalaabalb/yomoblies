@@ -52,7 +52,7 @@ class CartProvider extends ChangeNotifier {
   bool _showPaymentInstructions = false;
   bool get showPaymentInstructions => _showPaymentInstructions;
 
-  bool _isLoading = false;
+  final bool _isLoading = false;
   bool get isLoading => _isLoading;
 
   bool _isProcessingPayment = false;
@@ -652,7 +652,7 @@ class CartProvider extends ChangeNotifier {
                         style: const TextStyle(fontSize: 12),
                       ),
                     ))
-                .toList(),
+                ,
           ],
         ),
       ),
@@ -794,12 +794,12 @@ class CartProvider extends ChangeNotifier {
   void retrieveSavedAddress() {
     try {
       // First try to load from ProfileProvider's shared keys
-      phoneController.text = box.read(PHONE_KEY) ?? '';
-      streetController.text = box.read(STREET_KEY) ?? '';
-      cityController.text = box.read(CITY_KEY) ?? '';
-      stateController.text = box.read(STATE_KEY) ?? '';
-      postalCodeController.text = box.read(POSTAL_CODE_KEY) ?? '';
-      countryController.text = box.read(COUNTRY_KEY) ?? '';
+      phoneController.text = box.read(phoneKey) ?? '';
+      streetController.text = box.read(streetKey) ?? '';
+      cityController.text = box.read(cityKey) ?? '';
+      stateController.text = box.read(stateKey) ?? '';
+      postalCodeController.text = box.read(postalCodeKey) ?? '';
+      countryController.text = box.read(countryKey) ?? '';
       
       // Fallback to legacy saved address if shared keys are empty
       if (phoneController.text.isEmpty && 
@@ -834,12 +834,12 @@ class CartProvider extends ChangeNotifier {
       box.write(_savedAddressKey, address);
       
       // Also save to shared keys for ProfileProvider synchronization
-      box.write(PHONE_KEY, phoneController.text);
-      box.write(STREET_KEY, streetController.text);
-      box.write(CITY_KEY, cityController.text);
-      box.write(STATE_KEY, stateController.text);
-      box.write(POSTAL_CODE_KEY, postalCodeController.text);
-      box.write(COUNTRY_KEY, countryController.text);
+      box.write(phoneKey, phoneController.text);
+      box.write(streetKey, streetController.text);
+      box.write(cityKey, cityController.text);
+      box.write(stateKey, stateController.text);
+      box.write(postalCodeKey, postalCodeController.text);
+      box.write(countryKey, countryController.text);
     } catch (e) {
       return;
     }

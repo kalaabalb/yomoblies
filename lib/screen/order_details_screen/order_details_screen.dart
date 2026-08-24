@@ -101,7 +101,7 @@ class OrderDetailsScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             '${order.shippingAddress?.street}',
-            style: TextStyle(fontWeight: FontWeight.w500),
+            style: const TextStyle(fontWeight: FontWeight.w500),
           ),
           Text(
             '${order.shippingAddress?.city}, ${order.shippingAddress?.state}',
@@ -156,7 +156,7 @@ class OrderDetailsScreen extends StatelessWidget {
           const SizedBox(height: 12),
           ...(order.items ?? [])
               .map((item) => _buildOrderItem(context, item))
-              .toList(),
+              ,
         ],
       ),
     );

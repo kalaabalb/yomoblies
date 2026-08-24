@@ -640,7 +640,7 @@ class DataProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    bool isConnected = await NetworkUtils.checkServerConnection(MAIN_URL);
+    bool isConnected = await NetworkUtils.checkServerConnection(mainUrl);
 
     if (isConnected) {
       await Future.wait([
@@ -752,7 +752,7 @@ class DataProvider extends ChangeNotifier {
   // NEW: getAllOrders - fetch all orders and keep them in provider
   Future<List<Order>> getAllOrders({bool showSnack = false}) async {
     try {
-      final userJson = box.read(USER_INFO_BOX);
+      final userJson = box.read(userInfoBox);
       final userId = userJson is Map<String, dynamic> ? userJson['_id']?.toString() : null;
 
       if (userId == null || userId.isEmpty) {
@@ -888,8 +888,8 @@ class DataProvider extends ChangeNotifier {
       _filteredSubCategories = List.from(_allSubCategories);
     } else {
       final lowcase = keyword.toLowerCase();
-      _filteredSubCategories = _allSubCategories.where((SubCategory) {
-        return (SubCategory.name ?? '').toLowerCase().contains(lowcase);
+      _filteredSubCategories = _allSubCategories.where((subCategory) {
+        return (subCategory.name ?? '').toLowerCase().contains(lowcase);
       }).toList();
     }
     notifyListeners();
@@ -920,8 +920,8 @@ class DataProvider extends ChangeNotifier {
       _filteredBrands = List.from(_allBrands);
     } else {
       final lowcase = keyword.toLowerCase();
-      _filteredBrands = _allBrands.where((Brand) {
-        return (Brand.name ?? '').toLowerCase().contains(lowcase);
+      _filteredBrands = _allBrands.where((brand) {
+        return (brand.name ?? '').toLowerCase().contains(lowcase);
       }).toList();
     }
     notifyListeners();
@@ -934,7 +934,7 @@ class DataProvider extends ChangeNotifier {
       final lowcase = keyword.toLowerCase();
 
       _filteredProducts = _allProducts.where((product) {
-        final ProductNameContainsKeyword =
+        final productNameContainsKeyword =
             (product.name ?? '').toLowerCase().contains(lowcase);
         final categoryNameContainsKeyword =
             product.proCategoryId?.name?.toLowerCase().contains(lowcase) ??
@@ -945,7 +945,7 @@ class DataProvider extends ChangeNotifier {
         final brandNameContainsKeyword =
             product.proBrandId?.name?.toLowerCase().contains(lowcase) ?? false;
 
-        return ProductNameContainsKeyword ||
+        return productNameContainsKeyword ||
             categoryNameContainsKeyword ||
             subCategoryNameContainsKeyword ||
             brandNameContainsKeyword;

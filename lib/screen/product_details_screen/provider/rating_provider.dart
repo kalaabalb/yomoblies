@@ -10,9 +10,9 @@ class RatingProvider extends ChangeNotifier {
   final box = GetStorage();
 
   // Rating state
-  Map<String, RatingResponse> _productRatings = {};
-  Map<String, RatingStats> _productRatingStats = {};
-  Map<String, Rating?> _userRatings = {};
+  final Map<String, RatingResponse> _productRatings = {};
+  final Map<String, RatingStats> _productRatingStats = {};
+  final Map<String, Rating?> _userRatings = {};
   bool _isLoading = false;
 
   // Getters

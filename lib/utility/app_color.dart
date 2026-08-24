@@ -53,25 +53,25 @@ class AppColor {
   static const Color infoDark = Color(0xFF0288D1);
 
   // Gradient Colors - Gentle gradients
-  static LinearGradient get primaryGradient => LinearGradient(
+  static LinearGradient get primaryGradient => const LinearGradient(
         colors: [primaryLight, primary],
         begin: Alignment.topRight,
         end: Alignment.bottomLeft,
       );
 
-  static LinearGradient get secondaryGradient => LinearGradient(
+  static LinearGradient get secondaryGradient => const LinearGradient(
         colors: [secondaryLight, secondary],
         begin: Alignment.topRight,
         end: Alignment.bottomLeft,
       );
 
-  static LinearGradient get accentGradient => LinearGradient(
+  static LinearGradient get accentGradient => const LinearGradient(
         colors: [accentLight, accent],
         begin: Alignment.topRight,
         end: Alignment.bottomLeft,
       );
 
-  static LinearGradient get successGradient => LinearGradient(
+  static LinearGradient get successGradient => const LinearGradient(
         colors: [successLight, success],
         begin: Alignment.topRight,
         end: Alignment.bottomLeft,
@@ -101,8 +101,8 @@ class AppColor {
       secondaryGradient,
       accentGradient,
       successGradient,
-      LinearGradient(
-        colors: [const Color(0xFFFCE4EC), const Color(0xFFF48FB1)],
+      const LinearGradient(
+        colors: [Color(0xFFFCE4EC), Color(0xFFF48FB1)],
         begin: Alignment.topRight,
         end: Alignment.bottomLeft,
       ),

@@ -96,7 +96,7 @@ class PosterSection extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     gradient: AppData.getRandomGentleGradient(),
                                   ),
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.image,
                                     color: AppColor.textSecondary,
                                     size: 40,

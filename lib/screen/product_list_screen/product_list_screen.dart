@@ -343,7 +343,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     width: 60,
                     height: 60,
                     margin: const EdgeInsets.only(top: 8),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
                     ),
@@ -426,7 +426,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(color: AppColor.darkOrange),
+            decoration: const BoxDecoration(color: AppColor.darkOrange),
             child: Consumer<ProfileProvider>(
               builder: (context, profileProvider, child) {
                 return Column(

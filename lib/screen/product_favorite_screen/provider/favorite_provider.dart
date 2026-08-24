@@ -10,13 +10,13 @@ class FavoriteProvider extends ChangeNotifier {
   FavoriteProvider();
 
   void updateToFavoriteList(String productId) {
-    List<dynamic> favoriteList = box.read(FAVORITE_PRODUCT_BOX) ?? [];
+    List<dynamic> favoriteList = box.read(favoriteProductBox) ?? [];
     if (favoriteList.contains(productId)) {
       favoriteList.remove(productId);
     } else {
       favoriteList.add(productId);
     }
-    box.write(FAVORITE_PRODUCT_BOX, favoriteList);
+    box.write(favoriteProductBox, favoriteList);
 
     // Immediately update the local list
     _updateFavoriteProducts();
@@ -24,7 +24,7 @@ class FavoriteProvider extends ChangeNotifier {
   }
 
   bool checkIsItemFavorite(String productId) {
-    List<dynamic> favoriteList = box.read(FAVORITE_PRODUCT_BOX) ?? [];
+    List<dynamic> favoriteList = box.read(favoriteProductBox) ?? [];
     return favoriteList.contains(productId);
   }
 
@@ -33,7 +33,7 @@ class FavoriteProvider extends ChangeNotifier {
   }
 
   void _updateFavoriteProducts([List<Product>? allProducts]) {
-    List<dynamic> favoriteListIds = box.read(FAVORITE_PRODUCT_BOX) ?? [];
+    List<dynamic> favoriteListIds = box.read(favoriteProductBox) ?? [];
     if (allProducts != null) {
       favoriteProduct = allProducts.where((product) {
         return favoriteListIds.contains(product.sId);
@@ -42,7 +42,7 @@ class FavoriteProvider extends ChangeNotifier {
   }
 
   void clearFavoriteList() {
-    box.remove(FAVORITE_PRODUCT_BOX);
+    box.remove(favoriteProductBox);
     favoriteProduct.clear();
     notifyListeners();
   }

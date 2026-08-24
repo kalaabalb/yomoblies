@@ -9,13 +9,13 @@ class PrimaryButton extends StatelessWidget {
   final Key? buttonKey; // Optional key parameter
 
   const PrimaryButton({
-    Key? key, // Use Key? instead of super.key
+    super.key, // Use Key? instead of super.key
     required this.text,
     required this.onPressed,
     this.isLoading = false,
     this.width,
     this.buttonKey,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -57,11 +57,11 @@ class SecondaryButton extends StatelessWidget {
   final Color? color;
 
   const SecondaryButton({
-    Key? key, // Use Key? instead of super.key
+    super.key, // Use Key? instead of super.key
     required this.text,
     required this.onPressed,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

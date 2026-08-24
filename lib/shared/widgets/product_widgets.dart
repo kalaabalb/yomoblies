@@ -116,7 +116,7 @@ class ProductGridItem extends StatelessWidget {
                       Flexible(
                         child: Text(
                           "Birr ${product.offerPrice ?? product.price}",
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: AppColor.darkOrange,

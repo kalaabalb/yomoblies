@@ -7,7 +7,7 @@ import 'package:get_storage/get_storage.dart';
 import '../utility/constants.dart';
 
 class HttpService {
-  final String baseUrl = MAIN_URL;
+  final String baseUrl = mainUrl;
   final int timeoutSeconds = 30;
   final GetStorage _storage = GetStorage();
 
@@ -78,7 +78,7 @@ class HttpService {
       );
 
       if (response.statusCode == null) {
-        throw SocketException(
+        throw const SocketException(
             'No response from server. Check if server is running and IP is correct.');
       }
 
@@ -96,9 +96,9 @@ class HttpService {
       }
 
       return response;
-    } on TimeoutException catch (e) {
+    } on TimeoutException {
       rethrow;
-    } on SocketException catch (e) {
+    } on SocketException {
       rethrow;
     } catch (e) {
       rethrow;
@@ -128,14 +128,14 @@ class HttpService {
 
   Response _handleResponse(Response response) {
     if (response.statusCode == null) {
-      throw SocketException(
+      throw const SocketException(
           'No response from server. Check if server is running.');
     }
 
     if (response.statusCode == 401) {
       final storage = GetStorage();
       storage.remove('auth_token');
-      storage.remove(USER_INFO_BOX);
+      storage.remove(userInfoBox);
       return response;
     }
 

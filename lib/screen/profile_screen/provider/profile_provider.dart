@@ -77,12 +77,12 @@ class ProfileProvider extends ChangeNotifier {
 
     addressFormKey.currentState!.save();
 
-    box.write(PHONE_KEY, phoneController.text);
-    box.write(STREET_KEY, streetController.text);
-    box.write(CITY_KEY, cityController.text);
-    box.write(STATE_KEY, stateController.text);
-    box.write(POSTAL_CODE_KEY, postalCodeController.text);
-    box.write(COUNTRY_KEY, countryController.text);
+    box.write(phoneKey, phoneController.text);
+    box.write(streetKey, streetController.text);
+    box.write(cityKey, cityController.text);
+    box.write(stateKey, stateController.text);
+    box.write(postalCodeKey, postalCodeController.text);
+    box.write(countryKey, countryController.text);
     // Also save GPS coordinates if available
     if (_latitude != null) box.write('LATITUDE_KEY', _latitude!);
     if (_longitude != null) box.write('LONGITUDE_KEY', _longitude!);
@@ -92,12 +92,12 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   void retrieveSavedAddress() {
-    phoneController.text = box.read(PHONE_KEY) ?? '';
-    streetController.text = box.read(STREET_KEY) ?? '';
-    cityController.text = box.read(CITY_KEY) ?? '';
-    stateController.text = box.read(STATE_KEY) ?? '';
-    postalCodeController.text = box.read(POSTAL_CODE_KEY) ?? '';
-    countryController.text = box.read(COUNTRY_KEY) ?? '';
+    phoneController.text = box.read(phoneKey) ?? '';
+    streetController.text = box.read(streetKey) ?? '';
+    cityController.text = box.read(cityKey) ?? '';
+    stateController.text = box.read(stateKey) ?? '';
+    postalCodeController.text = box.read(postalCodeKey) ?? '';
+    countryController.text = box.read(countryKey) ?? '';
     _latitude = box.read('LATITUDE_KEY');
     _longitude = box.read('LONGITUDE_KEY');
   }
@@ -110,12 +110,12 @@ class ProfileProvider extends ChangeNotifier {
     postalCodeController.clear();
     countryController.clear();
 
-    box.remove(PHONE_KEY);
-    box.remove(STREET_KEY);
-    box.remove(CITY_KEY);
-    box.remove(STATE_KEY);
-    box.remove(POSTAL_CODE_KEY);
-    box.remove(COUNTRY_KEY);
+    box.remove(phoneKey);
+    box.remove(streetKey);
+    box.remove(cityKey);
+    box.remove(stateKey);
+    box.remove(postalCodeKey);
+    box.remove(countryKey);
     box.remove('LATITUDE_KEY');
     box.remove('LONGITUDE_KEY');
     _latitude = null;
