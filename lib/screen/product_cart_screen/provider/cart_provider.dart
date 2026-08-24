@@ -281,7 +281,6 @@ class CartProvider extends ChangeNotifier {
       const String paymentStatus = 'pending';
 
       Map<String, dynamic> order = {
-        'userID': user.sId ?? '',
         'orderStatus': orderStatus,
         'items': cartItemToOrderItem(myCartItems),
         'totalPrice': finalAmount,

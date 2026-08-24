@@ -27,11 +27,14 @@ Future<void> main() async {
   OneSignal.Notifications.requestPermission(true);
   await cart.initializeCart(isPersistenceSupportEnabled: true);
 
+  final userProvider = UserProvider();
+  await userProvider.restoreSession();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => DataProvider()),
-        ChangeNotifierProvider(create: (context) => UserProvider()),
+        ChangeNotifierProvider.value(value: userProvider),
         ChangeNotifierProvider(create: (context) => ProfileProvider()),
         ChangeNotifierProvider(create: (context) => ProductListProvider()),
         ChangeNotifierProvider(

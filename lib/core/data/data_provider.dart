@@ -752,7 +752,19 @@ class DataProvider extends ChangeNotifier {
   // NEW: getAllOrders - fetch all orders and keep them in provider
   Future<List<Order>> getAllOrders({bool showSnack = false}) async {
     try {
-      Response response = await service.getItems(endpointUrl: 'orders');
+      final userJson = box.read(USER_INFO_BOX);
+      final userId = userJson is Map<String, dynamic> ? userJson['_id']?.toString() : null;
+
+      if (userId == null || userId.isEmpty) {
+        _allOrders = [];
+        _filteredOrders = [];
+        notifyListeners();
+        return _filteredOrders;
+      }
+
+      Response response = await service.getItems(
+        endpointUrl: 'orders/orderByUserId/$userId',
+      );
       ApiResponse<List<Order>> apiResponse = ApiResponse.fromJson(
         response.body,
         (json) => (json as List).map((item) {

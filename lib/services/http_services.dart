@@ -2,18 +2,37 @@ import 'dart:async';
 import 'dart:io';
 import 'package:get/get_connect.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../utility/constants.dart';
 
 class HttpService {
   final String baseUrl = MAIN_URL;
   final int timeoutSeconds = 30;
+  final GetStorage _storage = GetStorage();
+
+  Map<String, String> _buildHeaders({bool includeJson = false}) {
+    final headers = <String, String>{
+      if (includeJson) 'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    final token = _storage.read('auth_token');
+    if (token is String && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+
+    return headers;
+  }
 
   Future<Response> getItems({required String endpointUrl}) async {
     try {
       final response = await GetConnect(
         timeout: Duration(seconds: timeoutSeconds),
-      ).get('$baseUrl/$endpointUrl');
+      ).get(
+        '$baseUrl/$endpointUrl',
+        headers: _buildHeaders(),
+      );
 
       return _handleResponse(response);
     } catch (e) {
@@ -31,7 +50,7 @@ class HttpService {
       ).post(
         '$baseUrl/$endpointUrl',
         itemData,
-        headers: {'Content-Type': 'application/json'},
+        headers: _buildHeaders(includeJson: true),
       );
 
       return _handleResponse(response);
@@ -46,31 +65,24 @@ class HttpService {
     required dynamic itemData,
   }) async {
     try {
-      print('🔄 Making update request to: $baseUrl/$endpointUrl/$itemId');
+      final requestPath = itemId.isEmpty
+          ? '$baseUrl/$endpointUrl'
+          : '$baseUrl/$endpointUrl/$itemId';
 
       final response = await GetConnect(
         timeout: const Duration(seconds: 30),
-        allowAutoSignedCert: true,
       ).put(
-        '$baseUrl/$endpointUrl/$itemId',
+        requestPath,
         itemData,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: _buildHeaders(includeJson: true),
       );
 
-      print('📥 Update response status: ${response.statusCode}');
-
       if (response.statusCode == null) {
-        print('❌ No response from server');
         throw SocketException(
             'No response from server. Check if server is running and IP is correct.');
       }
 
       if (response.statusCode! >= 400) {
-        print('❌ Server error: ${response.statusCode} - ${response.body}');
-
         // Try to get error message from response
         String errorMsg = 'Server error: ${response.statusCode}';
         if (response.body is Map) {
@@ -85,13 +97,10 @@ class HttpService {
 
       return response;
     } on TimeoutException catch (e) {
-      print('⏰ Request timeout: $e');
       rethrow;
     } on SocketException catch (e) {
-      print('🌐 Network error: $e');
       rethrow;
     } catch (e) {
-      print('❌ Unexpected error in updateItem: $e');
       rethrow;
     }
   }
@@ -101,9 +110,15 @@ class HttpService {
     required String itemId,
   }) async {
     try {
+      final requestPath = itemId.isEmpty
+          ? '$baseUrl/$endpointUrl'
+          : '$baseUrl/$endpointUrl/$itemId';
       final response = await GetConnect(
         timeout: Duration(seconds: timeoutSeconds),
-      ).delete('$baseUrl/$endpointUrl/$itemId');
+      ).delete(
+        requestPath,
+        headers: _buildHeaders(),
+      );
 
       return _handleResponse(response);
     } catch (e) {
@@ -115,6 +130,13 @@ class HttpService {
     if (response.statusCode == null) {
       throw SocketException(
           'No response from server. Check if server is running.');
+    }
+
+    if (response.statusCode == 401) {
+      final storage = GetStorage();
+      storage.remove('auth_token');
+      storage.remove(USER_INFO_BOX);
+      return response;
     }
 
     if (response.statusCode! >= 400) {

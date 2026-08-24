@@ -18,6 +18,11 @@ class UserProvider extends ChangeNotifier {
   UserProvider();
 
   User? getLoginUsr() {
+    final token = box.read('auth_token');
+    if (token == null || token.toString().isEmpty) {
+      return null;
+    }
+
     Map<String, dynamic>? userJson = box.read(USER_INFO_BOX);
 
     if (userJson == null || userJson.isEmpty) {
@@ -53,10 +58,19 @@ class UserProvider extends ChangeNotifier {
         final data = responseBody['data'];
 
         if (success && data != null) {
-          User user = User.fromJson(data as Map<String, dynamic>);
+          final loginData = data as Map<String, dynamic>;
+          final token = loginData['token']?.toString();
+          final userJson = loginData['user'] is Map<String, dynamic>
+              ? loginData['user'] as Map<String, dynamic>
+              : loginData;
+          User user = User.fromJson(userJson);
+
+          if (token == null || token.isEmpty) {
+            throw Exception('Authentication token missing from login response.');
+          }
 
           clearAllUserData();
-          await saveLoginInfo(user);
+          await saveLoginInfo(user, token: token);
 
           SnackBarHelper.showSuccessSnackBar('Welcome back, ${user.name}!');
           Get.offAll(const HomeScreen());
@@ -230,8 +244,8 @@ class UserProvider extends ChangeNotifier {
       }
 
       final response = await service.updateItem(
-        endpointUrl: 'users',
-        itemId: userId,
+        endpointUrl: 'users/profile',
+        itemId: '',
         itemData: updateData,
       );
 
@@ -247,7 +261,8 @@ class UserProvider extends ChangeNotifier {
 
           if (data != null && data is Map<String, dynamic>) {
             final updatedUser = User.fromJson(data);
-            await saveLoginInfo(updatedUser);
+            final storedToken = box.read('auth_token')?.toString();
+            await saveLoginInfo(updatedUser, token: storedToken);
 
             notifyListeners();
 
@@ -288,10 +303,13 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> saveLoginInfo(User? loginUser) async {
+  Future<void> saveLoginInfo(User? loginUser, {String? token}) async {
     if (loginUser == null) return;
     try {
       await box.write(USER_INFO_BOX, loginUser.toJson());
+      if (token != null && token.isNotEmpty) {
+        await box.write('auth_token', token);
+      }
       notifyListeners();
     } catch (e) {
       print('Error saving login info: $e');
@@ -300,6 +318,7 @@ class UserProvider extends ChangeNotifier {
 
   void clearAllUserData() {
     try {
+      box.remove('auth_token');
       box.remove(USER_INFO_BOX);
 
       box.remove(FAVORITE_PRODUCT_BOX);
@@ -337,5 +356,32 @@ class UserProvider extends ChangeNotifier {
       print('Error during logout: $e');
       Get.offAll(const LoginScreen());
     }
+  }
+
+  Future<void> restoreSession() async {
+    final token = box.read('auth_token');
+    final userJson = box.read(USER_INFO_BOX);
+
+    if (token == null || token.toString().isEmpty || userJson == null) {
+      clearAllUserData();
+      return;
+    }
+
+    try {
+      final response = await service.getItems(endpointUrl: 'users/profile');
+      if (response.isOk) {
+        final responseBody = response.body as Map<String, dynamic>;
+        final data = responseBody['data'];
+
+        if (data is Map<String, dynamic>) {
+          await saveLoginInfo(User.fromJson(data), token: token.toString());
+          return;
+        }
+      }
+    } catch (e) {
+      // Fall through to clear invalid sessions.
+    }
+
+    clearAllUserData();
   }
 }

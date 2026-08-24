@@ -1,5 +1,8 @@
 // Update this line:
-const MAIN_URL = 'https://yonasmarketplace-backend.onrender.com';
+const String MAIN_URL = String.fromEnvironment(
+  'MAIN_URL',
+  defaultValue: 'https://yonasmarketplace-backend.onrender.com',
+);
 
 // Keep all your other constants:
 const FAVORITE_PRODUCT_BOX = 'FAVORITE_PRODUCT_BOX';
