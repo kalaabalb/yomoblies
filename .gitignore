@@ -39,6 +39,9 @@ Thumbs.db
 **/android/gradlew
 **/android/gradlew.bat
 **/android/local.properties
+**/android/key.properties
+**/android/app/*.jks
+**/android/app/*.keystore
 **/android/**/GeneratedPluginRegistrant.java
 **/android/app/src/main/java/io/flutter/plugins/
 **/android/app/src/main/res/drawable-*/

@@ -1,4 +1,4 @@
-package com.example.flutter_ecommerce_new
+package com.yomobiles.client
 
 import io.flutter.embedding.android.FlutterActivity
 

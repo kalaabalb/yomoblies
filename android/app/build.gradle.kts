@@ -1,3 +1,6 @@
+import java.util.Properties
+import org.gradle.api.GradleException
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,8 +8,26 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+}
+
+val releaseBuildRequested =
+    gradle.startParameter.taskNames.any { taskName ->
+        taskName.contains("Release", ignoreCase = true)
+    }
+
+if (releaseBuildRequested && !keystorePropertiesFile.exists()) {
+    throw GradleException(
+        "Android release signing is not configured. Copy android/key.properties.example to android/key.properties " +
+            "and point storeFile to a local release keystore before building release artifacts.",
+    )
+}
+
 android {
-    namespace = "com.example.flutter_ecommerce_new"
+    namespace = "com.yomobiles.client"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -16,20 +37,47 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.flutter_ecommerce_new"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        applicationId = "com.yomobiles.client"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            if (keystorePropertiesFile.exists()) {
+                val storeFilePath = keystoreProperties["storeFile"]?.toString()?.trim().orEmpty()
+                val storePassword = keystoreProperties["storePassword"]?.toString().orEmpty()
+                val keyAlias = keystoreProperties["keyAlias"]?.toString().orEmpty()
+                val keyPassword = keystoreProperties["keyPassword"]?.toString().orEmpty()
+
+                if (storeFilePath.isBlank() || storePassword.isBlank() || keyAlias.isBlank() || keyPassword.isBlank()) {
+                    throw GradleException(
+                        "android/key.properties is missing required release signing values. " +
+                            "Copy android/key.properties.example and fill in all placeholders.",
+                    )
+                }
+
+                val storeFile = rootProject.file(storeFilePath)
+                if (!storeFile.exists()) {
+                    throw GradleException(
+                        "Release keystore not found at ${storeFile.absolutePath}. " +
+                            "Update android/key.properties to point to a valid local keystore.",
+                    )
+                }
+
+                this.storeFile = storeFile
+                this.storePassword = storePassword
+                this.keyAlias = keyAlias
+                this.keyPassword = keyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // Keep this signing config so it can still build
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
 
             // Enable code shrinking and resource shrinking
             isMinifyEnabled = true
