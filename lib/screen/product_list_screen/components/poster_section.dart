@@ -63,7 +63,7 @@ class PosterSection extends StatelessWidget {
                               begin: Alignment.centerRight,
                               end: Alignment.centerLeft,
                               colors: [
-                                Colors.white.withOpacity(0.3),
+                                Colors.white.withValues(alpha: 0.3),
                                 Colors.transparent,
                               ],
                             ),

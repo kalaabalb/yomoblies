@@ -36,12 +36,12 @@ class _MyOrderScreenState extends State<MyOrderScreen> {
     final userProvider = context.userProvider;
     final currentUser = userProvider.getLoginUsr();
 
-    print(
+    debugPrint(
         '🟡 [ORDERS DEBUG] Total orders from server: ${dataProvider.orders.length}');
 
     final userOrders = dataProvider.orders.where((order) {
       final isUserOrder = order.userID?.sId == currentUser?.sId;
-      print(
+      debugPrint(
           '🟡 [ORDERS DEBUG] Order ${order.sId} - User: ${order.userID?.sId} - Is Current User: $isUserOrder');
       return isUserOrder;
     }).toList();
@@ -238,7 +238,7 @@ class _MyOrderScreenState extends State<MyOrderScreen> {
     final userProvider = context.userProvider;
     final currentUser = userProvider.getLoginUsr();
 
-    print(
+    debugPrint(
         '🟡 [ORDERS FULL DEBUG] All orders count: ${dataProvider.orders.length}');
 
     // ignore: unused_local_variable

@@ -373,38 +373,6 @@ class _RatingSectionState extends State<RatingSection> {
     );
   }
 
-  Widget _buildAllReviewsSection(
-      RatingResponse ratingsResponse, RatingProvider ratingProvider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Customer Reviews',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        const SizedBox(height: 8),
-        ...ratingsResponse.ratings!.map((rating) => _buildReviewCard(rating)),
-
-        // Load More Button
-        if (ratingsResponse.currentPage! < ratingsResponse.totalPages!)
-          Center(
-            child: TextButton(
-              onPressed: () {
-                ratingProvider.getRatingsForProduct(
-                  widget.product.sId!,
-                  page: ratingsResponse.currentPage! + 1,
-                );
-              },
-              child: const Text('Load More Reviews'),
-            ),
-          ),
-      ],
-    );
-  }
-
   Widget _buildReviewCard(Rating rating) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),

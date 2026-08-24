@@ -116,12 +116,12 @@ class AppColor {
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
       colors: [
-        baseColor.withOpacity(0.9),
-        baseColor.withOpacity(0.7),
-        baseColor.withOpacity(0.5),
-        baseColor.withOpacity(0.3),
-        baseColor.withOpacity(0.5),
-        baseColor.withOpacity(0.7),
+        baseColor.withValues(alpha: 0.9),
+        baseColor.withValues(alpha: 0.7),
+        baseColor.withValues(alpha: 0.5),
+        baseColor.withValues(alpha: 0.3),
+        baseColor.withValues(alpha: 0.5),
+        baseColor.withValues(alpha: 0.7),
       ],
       stops: const [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
     );

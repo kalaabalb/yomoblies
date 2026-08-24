@@ -102,7 +102,7 @@ class RatingProvider extends ChangeNotifier {
         }
       } else if (response.statusCode == 404) {
         // 404 means no rating found - this is normal, not an error
-        print(
+        debugPrint(
             '🟡 [RATING] No rating found for user $userId on product $productId');
         _userRatings[productId] = null;
         notifyListeners();

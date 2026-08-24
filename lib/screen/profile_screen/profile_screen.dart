@@ -130,17 +130,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  void _togglePasswordChange() {
-    setState(() {
-      _isChangingPassword = !_isChangingPassword;
-      if (!_isChangingPassword) {
-        _currentPasswordController.clear();
-        _newPasswordController.clear();
-        _confirmPasswordController.clear();
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final user = context.userProvider.getLoginUsr();
@@ -375,7 +364,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               fontWeight: FontWeight.bold,
               color: Theme.of(
                 context,
-              ).textTheme.bodyMedium?.color?.withOpacity(0.6),
+              ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
               letterSpacing: 1.2,
             ),
           ),
@@ -455,7 +444,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               fontWeight: FontWeight.bold,
               color: Theme.of(
                 context,
-              ).textTheme.bodyMedium?.color?.withOpacity(0.6),
+              ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
               letterSpacing: 1.2,
             ),
           ),

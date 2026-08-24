@@ -106,7 +106,7 @@ void showCustomBottomSheet(BuildContext context) {
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.grey.withOpacity(0.1),
+                                      color: Colors.grey.withValues(alpha: 0.1),
                                       spreadRadius: 1,
                                       blurRadius: 3,
                                       offset: const Offset(0, 1),
@@ -277,7 +277,7 @@ void showCustomBottomSheet(BuildContext context) {
                           width: double.maxFinite,
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: Colors.grey.withOpacity(0.3),
+                              color: Colors.grey.withValues(alpha: 0.3),
                             ),
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -408,14 +408,14 @@ Widget _buildPaymentOption(
   return Card(
     elevation: isSelected ? 2 : 0,
     color: isSelected
-        ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+        ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
         : Theme.of(context).cardColor,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(8),
       side: BorderSide(
         color: isSelected
             ? Theme.of(context).colorScheme.primary
-            : Colors.grey.withOpacity(0.3),
+            : Colors.grey.withValues(alpha: 0.3),
         width: isSelected ? 2 : 1,
       ),
     ),

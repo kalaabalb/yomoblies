@@ -24,9 +24,9 @@ class AppData {
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
       colors: [
-        const Color(0xFFE3F2FD).withOpacity(0.9),
-        const Color(0xFFBBDEFB).withOpacity(0.7),
-        const Color(0xFF90CAF9).withOpacity(0.5),
+        const Color(0xFFE3F2FD).withValues(alpha: 0.9),
+        const Color(0xFFBBDEFB).withValues(alpha: 0.7),
+        const Color(0xFF90CAF9).withValues(alpha: 0.5),
       ],
       stops: const [0.0, 0.6, 1.0],
     );
@@ -37,9 +37,9 @@ class AppData {
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
       colors: [
-        const Color(0xFFF3E5F5).withOpacity(0.9),
-        const Color(0xFFE1BEE7).withOpacity(0.7),
-        const Color(0xFFCE93D8).withOpacity(0.5),
+        const Color(0xFFF3E5F5).withValues(alpha: 0.9),
+        const Color(0xFFE1BEE7).withValues(alpha: 0.7),
+        const Color(0xFFCE93D8).withValues(alpha: 0.5),
       ],
       stops: const [0.0, 0.6, 1.0],
     );
@@ -50,9 +50,9 @@ class AppData {
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
       colors: [
-        const Color(0xFFE8F5E9).withOpacity(0.9),
-        const Color(0xFFC8E6C9).withOpacity(0.7),
-        const Color(0xFFA5D6A7).withOpacity(0.5),
+        const Color(0xFFE8F5E9).withValues(alpha: 0.9),
+        const Color(0xFFC8E6C9).withValues(alpha: 0.7),
+        const Color(0xFFA5D6A7).withValues(alpha: 0.5),
       ],
       stops: const [0.0, 0.6, 1.0],
     );
@@ -63,9 +63,9 @@ class AppData {
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
       colors: [
-        const Color(0xFFFFF3E0).withOpacity(0.9),
-        const Color(0xFFFFE0B2).withOpacity(0.7),
-        const Color(0xFFFFCC80).withOpacity(0.5),
+        const Color(0xFFFFF3E0).withValues(alpha: 0.9),
+        const Color(0xFFFFE0B2).withValues(alpha: 0.7),
+        const Color(0xFFFFCC80).withValues(alpha: 0.5),
       ],
       stops: const [0.0, 0.6, 1.0],
     );
@@ -87,12 +87,12 @@ class AppData {
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
       colors: [
-        baseColor.withOpacity(0.9),
-        baseColor.withOpacity(0.7),
-        baseColor.withOpacity(0.5),
-        baseColor.withOpacity(0.3),
-        baseColor.withOpacity(0.5),
-        baseColor.withOpacity(0.7),
+        baseColor.withValues(alpha: 0.9),
+        baseColor.withValues(alpha: 0.7),
+        baseColor.withValues(alpha: 0.5),
+        baseColor.withValues(alpha: 0.3),
+        baseColor.withValues(alpha: 0.5),
+        baseColor.withValues(alpha: 0.7),
       ],
       stops: const [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
     );
@@ -125,8 +125,8 @@ class AppData {
       end: Alignment.bottomLeft,
       colors: [
         baseColor,
-        baseColor.withOpacity(0.8),
-        baseColor.withOpacity(0.6),
+        baseColor.withValues(alpha: 0.8),
+        baseColor.withValues(alpha: 0.6),
       ],
       stops: const [0.0, 0.5, 1.0],
     );
@@ -148,7 +148,7 @@ class AppData {
       borderRadius: BorderRadius.circular(15),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.05),
+          color: Colors.black.withValues(alpha: 0.05),
           blurRadius: 10,
           spreadRadius: 2,
           offset: const Offset(0, 4),

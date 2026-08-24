@@ -292,7 +292,7 @@ class UserProvider extends ChangeNotifier {
       }
     } catch (e) {
       _closeLoadingDialog(isLoadingDialogShown);
-      print('❌ Profile update error: $e');
+      debugPrint('❌ Profile update error: $e');
       SnackBarHelper.showProfileError('An error occurred');
     }
   }
@@ -312,7 +312,7 @@ class UserProvider extends ChangeNotifier {
       }
       notifyListeners();
     } catch (e) {
-      print('Error saving login info: $e');
+      debugPrint('Error saving login info: $e');
     }
   }
 
@@ -337,7 +337,7 @@ class UserProvider extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      print('Error clearing user data: $e');
+      debugPrint('Error clearing user data: $e');
     }
   }
 
@@ -353,7 +353,7 @@ class UserProvider extends ChangeNotifier {
       SnackBarHelper.showInfoSnackBar('Logged out successfully');
       notifyListeners();
     } catch (e) {
-      print('Error during logout: $e');
+      debugPrint('Error during logout: $e');
       Get.offAll(const LoginScreen());
     }
   }

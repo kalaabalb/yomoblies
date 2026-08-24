@@ -40,7 +40,7 @@ class CategorySelector extends StatelessWidget {
                   border: Border.all(
                     color: category.isSelected
                         ? colorScheme.primary
-                        : colorScheme.outline.withOpacity(0.3),
+                        : colorScheme.outline.withValues(alpha: 0.3),
                     width: category.isSelected ? 2 : 1,
                   ),
                 ),

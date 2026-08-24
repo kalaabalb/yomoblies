@@ -60,7 +60,7 @@ class InfoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: isTotal
             ? Border.all(
-                color: AppColor.primary.withOpacity(0.2),
+                color: AppColor.primary.withValues(alpha: 0.2),
                 width: 1,
               )
             : null,
