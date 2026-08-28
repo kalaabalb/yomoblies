@@ -1,7 +1,11 @@
 name: e_commerce_flutter
-description: Flutter e-commerce frontend with Provider state management and REST API integration
+description: YoMobiles Flutter client for shopping, cart, favorites, and order management
 publish_to: 'none'
 version: 1.0.0+5
+
+homepage: https://github.com/kalaabalb/yomoblies
+repository: https://github.com/kalaabalb/yomoblies
+issue_tracker: https://github.com/kalaabalb/yomoblies/issues
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

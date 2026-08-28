@@ -7,11 +7,12 @@ This repository uses [`CHANGELOG.md`](../CHANGELOG.md) as the canonical release 
 The current public documentation pass includes:
 
 - a rewritten README
-- screenshot placeholders
+- screenshot guidance and production screenshot indexing
 - architecture and folder documentation
 - API documentation
-- GitHub workflow and issue templates
 - release process guidance
+- GitHub workflow and contribution templates
+- repository metadata cleanup
 
 ## What to Update for a Release
 
@@ -22,4 +23,3 @@ Before tagging a release:
 3. Verify `flutter test`
 4. Confirm the backend contract still matches the documented endpoints
 5. Add screenshots if the release is intended for public presentation
-
